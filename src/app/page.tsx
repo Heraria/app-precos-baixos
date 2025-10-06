@@ -127,47 +127,20 @@ const sampleProducts: Product[] = [
   }
 ]
 
-const sampleOrders: Order[] = [
-  {
-    id: 'ORD-001',
-    customerName: 'João Silva',
-    customerEmail: 'joao@email.com',
-    items: [
-      { ...sampleProducts[0], quantity: 1 },
-      { ...sampleProducts[1], quantity: 2 }
-    ],
-    total: 159.70,
-    status: 'processing',
-    date: '2024-01-15',
-    shippingAddress: 'Rua das Flores, 123 - Lisboa, Portugal'
-  },
-  {
-    id: 'ORD-002',
-    customerName: 'Maria Santos',
-    customerEmail: 'maria@email.com',
-    items: [
-      { ...sampleProducts[4], quantity: 1 }
-    ],
-    total: 67.90,
-    status: 'shipped',
-    date: '2024-01-14',
-    shippingAddress: 'Av. da Liberdade, 456 - Porto, Portugal'
-  }
-]
-
 export default function PrecosbaixosApp() {
   const [currentView, setCurrentView] = useState<'store' | 'admin' | 'login'>('store')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loginCredentials, setLoginCredentials] = useState({ username: '', password: '' })
   const [products, setProducts] = useState<Product[]>(sampleProducts)
   const [cart, setCart] = useState<CartItem[]>([])
-  const [orders, setOrders] = useState<Order[]>(sampleOrders)
+  const [orders, setOrders] = useState<Order[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [showCart, setShowCart] = useState(false)
   const [showCheckout, setShowCheckout] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [notification, setNotification] = useState<{ type: 'success' | 'error' | 'info', message: string } | null>(null)
+  const [categories, setCategories] = useState<string[]>(['Acessórios para Carros', 'Itens para Casa'])
 
   // Estados para formulários admin
   const [newProduct, setNewProduct] = useState({
@@ -182,6 +155,8 @@ export default function PrecosbaixosApp() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [showAddProduct, setShowAddProduct] = useState(false)
   const [showEditProduct, setShowEditProduct] = useState(false)
+  const [showAddCategory, setShowAddCategory] = useState(false)
+  const [newCategory, setNewCategory] = useState('')
 
   // Sistema de notificações
   const showNotification = (type: 'success' | 'error' | 'info', message: string) => {
@@ -189,10 +164,9 @@ export default function PrecosbaixosApp() {
     setTimeout(() => setNotification(null), 4000)
   }
 
-  // Autenticação segura - credenciais não expostas
+  // Autenticação segura - nova senha
   const handleLogin = () => {
-    // Sistema de autenticação seguro - credenciais verificadas no backend
-    if (loginCredentials.username === 'admin' && loginCredentials.password === 'admin123') {
+    if (loginCredentials.username === 'admin' && loginCredentials.password === 'herariaadm7') {
       setIsAuthenticated(true)
       setCurrentView('admin')
       showNotification('success', 'Login realizado com sucesso!')
@@ -215,7 +189,7 @@ export default function PrecosbaixosApp() {
     return matchesSearch && matchesCategory
   })
 
-  const categories = ['all', ...Array.from(new Set(products.map(p => p.category)))]
+  const allCategories = ['all', ...categories]
 
   // Funções do carrinho
   const addToCart = (product: Product) => {
@@ -251,6 +225,24 @@ export default function PrecosbaixosApp() {
         item.id === productId ? { ...item, quantity } : item
       )
     )
+  }
+
+  // Funções admin para categorias
+  const handleAddCategory = () => {
+    if (!newCategory.trim()) {
+      showNotification('error', 'Por favor, digite o nome da categoria.')
+      return
+    }
+
+    if (categories.includes(newCategory.trim())) {
+      showNotification('error', 'Esta categoria já existe.')
+      return
+    }
+
+    setCategories(prev => [...prev, newCategory.trim()])
+    setNewCategory('')
+    setShowAddCategory(false)
+    showNotification('success', `Categoria "${newCategory.trim()}" criada com sucesso!`)
   }
 
   // Funções admin para produtos
@@ -595,7 +587,7 @@ export default function PrecosbaixosApp() {
 
   // Banner de Promoção com animação mais suave
   const PromotionBanner = () => (
-    <div className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 text-white py-4 px-6 mb-8 rounded-2xl shadow-lg relative overflow-hidden animate-gradient-x">
+    <div className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 text-white py-4 px-6 mb-8 rounded-2xl shadow-lg relative overflow-hidden">
       <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
       <div className="relative z-10 flex items-center justify-center space-x-4">
         <Gift className="w-7 h-7 animate-bounce" />
@@ -1005,7 +997,7 @@ export default function PrecosbaixosApp() {
           <span className="text-sm font-medium">Filtrar por:</span>
         </div>
         <div className="flex flex-wrap gap-2">
-          {categories.map((category) => (
+          {allCategories.map((category) => (
             <Button
               key={category}
               variant={selectedCategory === category ? "default" : "outline"}
@@ -1075,7 +1067,7 @@ export default function PrecosbaixosApp() {
           <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent">
             Painel Administrativo
           </h2>
-          <p className="text-gray-600">Gerencie sua loja, produtos e pedidos de forma intuitiva</p>
+          <p className="text-gray-600">Gerencie sua loja, produtos e categorias de forma intuitiva</p>
         </div>
         <div className="flex items-center space-x-2 text-sm text-gray-500">
           <User className="w-4 h-4" />
@@ -1084,12 +1076,15 @@ export default function PrecosbaixosApp() {
       </div>
 
       <Tabs defaultValue="dashboard" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
+        <TabsList className="grid w-full grid-cols-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
           <TabsTrigger value="dashboard" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-700 data-[state=active]:text-white rounded-lg">
             Dashboard
           </TabsTrigger>
           <TabsTrigger value="products" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-700 data-[state=active]:text-white rounded-lg">
             Produtos
+          </TabsTrigger>
+          <TabsTrigger value="categories" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-700 data-[state=active]:text-white rounded-lg">
+            Categorias
           </TabsTrigger>
           <TabsTrigger value="orders" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-700 data-[state=active]:text-white rounded-lg">
             Pedidos
@@ -1109,7 +1104,7 @@ export default function PrecosbaixosApp() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-blue-600">€{totalRevenue.toFixed(2)}</div>
-                <p className="text-xs text-blue-600">+12% em relação ao mês passado</p>
+                <p className="text-xs text-blue-600">Vendas realizadas</p>
               </CardContent>
             </Card>
 
@@ -1120,7 +1115,7 @@ export default function PrecosbaixosApp() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-indigo-600">{totalOrders}</div>
-                <p className="text-xs text-indigo-600">+8% em relação ao mês passado</p>
+                <p className="text-xs text-indigo-600">Pedidos processados</p>
               </CardContent>
             </Card>
 
@@ -1140,29 +1135,25 @@ export default function PrecosbaixosApp() {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Package className="w-5 h-5 text-blue-600" />
-                <span>Pedidos Recentes</span>
+                <span>Resumo da Loja</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {orders.slice(0, 5).map((order) => (
-                  <div key={order.id} className="flex items-center justify-between p-4 border rounded-xl hover:shadow-md transition-all duration-300 hover:scale-[1.02] bg-gradient-to-r hover:from-gray-50 hover:to-blue-50">
-                    <div>
-                      <p className="font-medium text-blue-800">{order.id}</p>
-                      <p className="text-sm text-gray-600">{order.customerName}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium text-blue-600">€{order.total.toFixed(2)}</p>
-                      <Badge variant={
-                        order.status === 'delivered' ? 'default' :
-                        order.status === 'shipped' ? 'secondary' :
-                        order.status === 'processing' ? 'outline' : 'destructive'
-                      } className="text-xs rounded-full">
-                        {order.status}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
+              <div className="text-center py-8">
+                <div className="text-6xl mb-4">🚀</div>
+                <h3 className="text-xl font-semibold text-blue-800 mb-2">Loja Pronta para Vendas!</h3>
+                <p className="text-gray-600 mb-4">
+                  Sua aplicação está configurada e pronta para receber clientes. 
+                  Adicione produtos, gerencie categorias e comece a vender!
+                </p>
+                <div className="flex justify-center space-x-4">
+                  <Button 
+                    onClick={() => setCurrentView('store')}
+                    className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 rounded-full"
+                  >
+                    Ver Loja
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -1230,6 +1221,52 @@ export default function PrecosbaixosApp() {
           </div>
         </TabsContent>
 
+        {/* Categorias */}
+        <TabsContent value="categories" className="space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-xl font-semibold text-blue-800">Gerenciar Categorias</h3>
+              <p className="text-sm text-gray-600">Crie e organize as categorias dos seus produtos</p>
+            </div>
+            <Button 
+              onClick={() => setShowAddCategory(true)}
+              className="hover:scale-105 transition-all duration-300 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 shadow-lg rounded-full"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nova Categoria
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {categories.map((category, index) => (
+              <Card key={category} className="hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-br from-white to-blue-50 rounded-2xl">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-semibold text-blue-800 text-lg">{category}</h4>
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-700 rounded-full">
+                      {products.filter(p => p.category === category).length} produtos
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Categoria com {products.filter(p => p.category === category).length} produtos ativos
+                  </p>
+                  <div className="flex space-x-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 hover:scale-105 transition-all duration-300 hover:bg-blue-50 hover:border-blue-300 rounded-full"
+                      onClick={() => setSelectedCategory(category)}
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      Ver Produtos
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
         {/* Pedidos */}
         <TabsContent value="orders" className="space-y-6">
           <div>
@@ -1237,55 +1274,73 @@ export default function PrecosbaixosApp() {
             <p className="text-sm text-gray-600">Acompanhe e atualize o status dos pedidos</p>
           </div>
           
-          <div className="space-y-4">
-            {orders.map((order) => (
-              <Card key={order.id} className="hover:shadow-xl transition-all duration-300 hover:scale-[1.02] bg-gradient-to-br from-white to-blue-50 rounded-2xl">
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
-                    <div>
-                      <h4 className="font-semibold text-lg text-blue-800">{order.id}</h4>
-                      <p className="text-gray-600">{order.customerName} - {order.customerEmail}</p>
-                      <p className="text-sm text-gray-500">{order.date}</p>
+          {orders.length === 0 ? (
+            <Card className="shadow-lg rounded-2xl">
+              <CardContent className="p-12 text-center">
+                <div className="text-6xl mb-4">📦</div>
+                <h3 className="text-xl font-semibold text-blue-800 mb-2">Nenhum Pedido Ainda</h3>
+                <p className="text-gray-600 mb-4">
+                  Quando os clientes começarem a fazer pedidos, eles aparecerão aqui para você gerenciar.
+                </p>
+                <Button 
+                  onClick={() => setCurrentView('store')}
+                  className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 rounded-full"
+                >
+                  Ir para Loja
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {orders.map((order) => (
+                <Card key={order.id} className="hover:shadow-xl transition-all duration-300 hover:scale-[1.02] bg-gradient-to-br from-white to-blue-50 rounded-2xl">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
+                      <div>
+                        <h4 className="font-semibold text-lg text-blue-800">{order.id}</h4>
+                        <p className="text-gray-600">{order.customerName} - {order.customerEmail}</p>
+                        <p className="text-sm text-gray-500">{order.date}</p>
+                      </div>
+                      <div className="flex items-center space-x-4 mt-4 md:mt-0">
+                        <span className="text-xl font-bold text-blue-600">€{order.total.toFixed(2)}</span>
+                        <Select 
+                          defaultValue={order.status}
+                          onValueChange={(value) => handleUpdateOrderStatus(order.id, value)}
+                        >
+                          <SelectTrigger className="w-40 focus:ring-2 focus:ring-blue-500 rounded-xl">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="pending">Pendente</SelectItem>
+                            <SelectItem value="processing">Processando</SelectItem>
+                            <SelectItem value="shipped">Enviado</SelectItem>
+                            <SelectItem value="delivered">Entregue</SelectItem>
+                            <SelectItem value="cancelled">Cancelado</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-4 mt-4 md:mt-0">
-                      <span className="text-xl font-bold text-blue-600">€{order.total.toFixed(2)}</span>
-                      <Select 
-                        defaultValue={order.status}
-                        onValueChange={(value) => handleUpdateOrderStatus(order.id, value)}
-                      >
-                        <SelectTrigger className="w-40 focus:ring-2 focus:ring-blue-500 rounded-xl">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="pending">Pendente</SelectItem>
-                          <SelectItem value="processing">Processando</SelectItem>
-                          <SelectItem value="shipped">Enviado</SelectItem>
-                          <SelectItem value="delivered">Entregue</SelectItem>
-                          <SelectItem value="cancelled">Cancelado</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    
+                    <div className="border-t pt-4">
+                      <h5 className="font-medium mb-2 text-blue-700">Itens do Pedido:</h5>
+                      <div className="space-y-2">
+                        {order.items.map((item) => (
+                          <div key={item.id} className="flex justify-between items-center text-sm bg-blue-50 p-2 rounded-lg">
+                            <span>{item.name} x{item.quantity}</span>
+                            <span className="font-medium text-blue-600">€{(item.price * item.quantity).toFixed(2)}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="border-t pt-4">
-                    <h5 className="font-medium mb-2 text-blue-700">Itens do Pedido:</h5>
-                    <div className="space-y-2">
-                      {order.items.map((item) => (
-                        <div key={item.id} className="flex justify-between items-center text-sm bg-blue-50 p-2 rounded-lg">
-                          <span>{item.name} x{item.quantity}</span>
-                          <span className="font-medium text-blue-600">€{(item.price * item.quantity).toFixed(2)}</span>
-                        </div>
-                      ))}
+                    
+                    <div className="border-t pt-4 mt-4">
+                      <p className="text-sm"><strong className="text-blue-700">Morada:</strong> {order.shippingAddress}</p>
                     </div>
-                  </div>
-                  
-                  <div className="border-t pt-4 mt-4">
-                    <p className="text-sm"><strong className="text-blue-700">Morada:</strong> {order.shippingAddress}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </TabsContent>
 
         {/* Clientes */}
@@ -1295,44 +1350,99 @@ export default function PrecosbaixosApp() {
             <p className="text-sm text-gray-600">Visualize informações dos seus clientes</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from(new Set(orders.map(o => o.customerEmail))).map((email, index) => {
-              const customerOrders = orders.filter(o => o.customerEmail === email)
-              const customerName = customerOrders[0]?.customerName
-              const totalSpent = customerOrders.reduce((sum, order) => sum + order.total, 0)
-              
-              return (
-                <Card key={email} className="hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-br from-white to-blue-50 rounded-2xl">
-                  <CardContent className="p-6">
-                    <div className="flex items-center space-x-4 mb-4">
-                      <Avatar className="border-2 border-blue-200">
-                        <AvatarFallback className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold">
-                          {customerName?.charAt(0) || 'C'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <h4 className="font-semibold text-blue-800">{customerName}</h4>
-                        <p className="text-sm text-gray-600">{email}</p>
+          {orders.length === 0 ? (
+            <Card className="shadow-lg rounded-2xl">
+              <CardContent className="p-12 text-center">
+                <div className="text-6xl mb-4">👥</div>
+                <h3 className="text-xl font-semibold text-blue-800 mb-2">Nenhum Cliente Ainda</h3>
+                <p className="text-gray-600 mb-4">
+                  Quando os clientes começarem a fazer pedidos, suas informações aparecerão aqui.
+                </p>
+                <Button 
+                  onClick={() => setCurrentView('store')}
+                  className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 rounded-full"
+                >
+                  Ir para Loja
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from(new Set(orders.map(o => o.customerEmail))).map((email, index) => {
+                const customerOrders = orders.filter(o => o.customerEmail === email)
+                const customerName = customerOrders[0]?.customerName
+                const totalSpent = customerOrders.reduce((sum, order) => sum + order.total, 0)
+                
+                return (
+                  <Card key={email} className="hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-br from-white to-blue-50 rounded-2xl">
+                    <CardContent className="p-6">
+                      <div className="flex items-center space-x-4 mb-4">
+                        <Avatar className="border-2 border-blue-200">
+                          <AvatarFallback className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold">
+                            {customerName?.charAt(0) || 'C'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <h4 className="font-semibold text-blue-800">{customerName}</h4>
+                          <p className="text-sm text-gray-600">{email}</p>
+                        </div>
                       </div>
-                    </div>
-                    
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between p-2 bg-blue-50 rounded-lg">
-                        <span>Pedidos:</span>
-                        <span className="font-medium text-blue-600">{customerOrders.length}</span>
+                      
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between p-2 bg-blue-50 rounded-lg">
+                          <span>Pedidos:</span>
+                          <span className="font-medium text-blue-600">{customerOrders.length}</span>
+                        </div>
+                        <div className="flex justify-between p-2 bg-indigo-50 rounded-lg">
+                          <span>Total gasto:</span>
+                          <span className="font-medium text-indigo-600">€{totalSpent.toFixed(2)}</span>
+                        </div>
                       </div>
-                      <div className="flex justify-between p-2 bg-indigo-50 rounded-lg">
-                        <span>Total gasto:</span>
-                        <span className="font-medium text-indigo-600">€{totalSpent.toFixed(2)}</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
+
+      {/* Dialog para Adicionar Categoria */}
+      <Dialog open={showAddCategory} onOpenChange={setShowAddCategory}>
+        <DialogContent className="max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-blue-800">Nova Categoria</DialogTitle>
+            <DialogDescription>
+              Digite o nome da nova categoria para seus produtos
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="category-name" className="text-blue-700">Nome da Categoria *</Label>
+              <Input 
+                id="category-name" 
+                placeholder="Ex: Eletrônicos, Decoração..." 
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+                className="focus:ring-2 focus:ring-blue-500 rounded-xl"
+                onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddCategory(false)} className="rounded-full">
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleAddCategory}
+              className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 hover:scale-105 transition-all duration-300 rounded-full"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Criar Categoria
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Dialog para Adicionar Produto */}
       <Dialog open={showAddProduct} onOpenChange={setShowAddProduct}>
@@ -1365,8 +1475,9 @@ export default function PrecosbaixosApp() {
                     <SelectValue placeholder="Selecionar categoria" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Acessórios para Carros">Acessórios para Carros</SelectItem>
-                    <SelectItem value="Itens para Casa">Itens para Casa</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>{category}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -1473,8 +1584,9 @@ export default function PrecosbaixosApp() {
                       <SelectValue placeholder="Selecionar categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Acessórios para Carros">Acessórios para Carros</SelectItem>
-                      <SelectItem value="Itens para Casa">Itens para Casa</SelectItem>
+                      {categories.map((category) => (
+                        <SelectItem key={category} value={category}>{category}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -1610,10 +1722,9 @@ export default function PrecosbaixosApp() {
             <div>
               <h4 className="font-semibold mb-4">Categorias</h4>
               <ul className="space-y-2 text-sm text-gray-600">
-                <li>Acessórios para Carros</li>
-                <li>Itens para Casa</li>
-                <li>Eletrónicos</li>
-                <li>Decoração</li>
+                {categories.map((category) => (
+                  <li key={category}>{category}</li>
+                ))}
               </ul>
             </div>
             
