@@ -164,7 +164,7 @@ export default function PrecosbaixosApp() {
     setTimeout(() => setNotification(null), 4000)
   }
 
-  // Autenticação segura - nova senha
+  // Autenticação segura - credenciais atualizadas
   const handleLogin = () => {
     if (loginCredentials.username === 'admin' && loginCredentials.password === 'herariaadm7') {
       setIsAuthenticated(true)
@@ -472,22 +472,6 @@ export default function PrecosbaixosApp() {
               Loja
             </Button>
             
-            {/* Botão Admin sempre visível - acesso direto ao login */}
-            <Button
-              variant={currentView === 'admin' ? 'default' : 'outline'}
-              onClick={() => {
-                if (isAuthenticated) {
-                  setCurrentView('admin')
-                } else {
-                  setCurrentView('login')
-                }
-              }}
-              className="hidden sm:inline-flex transition-all duration-300 hover:scale-105 bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800"
-            >
-              <Package className="w-4 h-4 mr-2" />
-              Admin
-            </Button>
-            
             {/* Botão de logout apenas quando autenticado */}
             {isAuthenticated && (
               <Button
@@ -550,20 +534,6 @@ export default function PrecosbaixosApp() {
                   className="flex-1"
                 >
                   Loja
-                </Button>
-                <Button
-                  variant={currentView === 'admin' ? 'default' : 'outline'}
-                  onClick={() => {
-                    if (isAuthenticated) {
-                      setCurrentView('admin')
-                    } else {
-                      setCurrentView('login')
-                    }
-                    setIsMenuOpen(false)
-                  }}
-                  className="flex-1"
-                >
-                  Admin
                 </Button>
                 {isAuthenticated && (
                   <Button
@@ -1699,7 +1669,7 @@ export default function PrecosbaixosApp() {
       <CheckoutDialog />
       <NotificationAlert />
 
-      {/* Footer */}
+      {/* Footer com botão admin discreto */}
       <footer className="bg-white border-t mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -1759,8 +1729,25 @@ export default function PrecosbaixosApp() {
           
           <Separator className="my-8" />
           
-          <div className="text-center text-sm text-gray-600">
+          <div className="flex flex-col sm:flex-row justify-between items-center text-sm text-gray-600">
             <p>&copy; 2024 Preços Baixos. Todos os direitos reservados.</p>
+            
+            {/* Botão Admin discreto no footer */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                if (isAuthenticated) {
+                  setCurrentView('admin')
+                } else {
+                  setCurrentView('login')
+                }
+              }}
+              className="mt-4 sm:mt-0 text-xs text-gray-400 hover:text-gray-600 opacity-50 hover:opacity-100 transition-all duration-300"
+            >
+              <Lock className="w-3 h-3 mr-1" />
+              Admin
+            </Button>
           </div>
         </div>
       </footer>
