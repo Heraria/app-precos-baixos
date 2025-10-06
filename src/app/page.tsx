@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { ShoppingCart, Plus, Minus, Package, Users, DollarSign, TrendingUp, Search, Filter, Star, Heart, Eye, Edit, Trash2, X, Check, CreditCard, Truck, Shield, Menu, Sparkles, Zap, Gift, Percent, Lock, User } from 'lucide-react'
+import { ShoppingCart, Plus, Minus, Package, Users, DollarSign, TrendingUp, Search, Filter, Star, Heart, Eye, Edit, Trash2, X, Check, CreditCard, Truck, Shield, Menu, Sparkles, Zap, Gift, Percent, Lock, User, MessageCircle, Send, Phone, Mail, MapPin, Clock, Award, Headphones } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -38,11 +38,24 @@ interface Order {
   id: string
   customerName: string
   customerEmail: string
+  customerPhone: string
   items: CartItem[]
   total: number
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
   date: string
   shippingAddress: string
+}
+
+interface Question {
+  id: string
+  productId: string
+  productName: string
+  customerName: string
+  customerEmail: string
+  question: string
+  answer?: string
+  date: string
+  answered: boolean
 }
 
 // Dados de exemplo
@@ -134,10 +147,13 @@ export default function PrecosbaixosApp() {
   const [products, setProducts] = useState<Product[]>(sampleProducts)
   const [cart, setCart] = useState<CartItem[]>([])
   const [orders, setOrders] = useState<Order[]>([])
+  const [questions, setQuestions] = useState<Question[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [showCart, setShowCart] = useState(false)
   const [showCheckout, setShowCheckout] = useState(false)
+  const [showQuestionDialog, setShowQuestionDialog] = useState(false)
+  const [selectedProductForQuestion, setSelectedProductForQuestion] = useState<Product | null>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [notification, setNotification] = useState<{ type: 'success' | 'error' | 'info', message: string } | null>(null)
   const [categories, setCategories] = useState<string[]>(['Acessórios para Carros', 'Itens para Casa'])
@@ -157,6 +173,49 @@ export default function PrecosbaixosApp() {
   const [showEditProduct, setShowEditProduct] = useState(false)
   const [showAddCategory, setShowAddCategory] = useState(false)
   const [newCategory, setNewCategory] = useState('')
+
+  // Estados para checkout
+  const [checkoutData, setCheckoutData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: ''
+  })
+
+  // Estados para perguntas
+  const [questionData, setQuestionData] = useState({
+    name: '',
+    email: '',
+    question: ''
+  })
+
+  // Auto-save para mudanças no admin
+  useEffect(() => {
+    if (isAuthenticated) {
+      // Simular auto-save das alterações
+      const autoSaveTimer = setTimeout(() => {
+        localStorage.setItem('products', JSON.stringify(products))
+        localStorage.setItem('categories', JSON.stringify(categories))
+        localStorage.setItem('orders', JSON.stringify(orders))
+        localStorage.setItem('questions', JSON.stringify(questions))
+      }, 1000)
+
+      return () => clearTimeout(autoSaveTimer)
+    }
+  }, [products, categories, orders, questions, isAuthenticated])
+
+  // Carregar dados salvos
+  useEffect(() => {
+    const savedProducts = localStorage.getItem('products')
+    const savedCategories = localStorage.getItem('categories')
+    const savedOrders = localStorage.getItem('orders')
+    const savedQuestions = localStorage.getItem('questions')
+
+    if (savedProducts) setProducts(JSON.parse(savedProducts))
+    if (savedCategories) setCategories(JSON.parse(savedCategories))
+    if (savedOrders) setOrders(JSON.parse(savedOrders))
+    if (savedQuestions) setQuestions(JSON.parse(savedQuestions))
+  }, [])
 
   // Sistema de notificações
   const showNotification = (type: 'success' | 'error' | 'info', message: string) => {
@@ -320,6 +379,71 @@ export default function PrecosbaixosApp() {
     showNotification('success', `Status do pedido ${orderId} atualizado para "${newStatus}".`)
   }
 
+  // Função para finalizar compra
+  const handleFinalizePurchase = () => {
+    if (!checkoutData.name || !checkoutData.email || !checkoutData.phone || !checkoutData.address) {
+      showNotification('error', 'Por favor, preencha todos os campos obrigatórios.')
+      return
+    }
+
+    const newOrder: Order = {
+      id: `PED-${Date.now()}`,
+      customerName: checkoutData.name,
+      customerEmail: checkoutData.email,
+      customerPhone: checkoutData.phone,
+      items: [...cart],
+      total: cartTotal,
+      status: 'pending',
+      date: new Date().toLocaleDateString('pt-PT'),
+      shippingAddress: checkoutData.address
+    }
+
+    setOrders(prev => [...prev, newOrder])
+    setCart([])
+    setCheckoutData({ name: '', email: '', phone: '', address: '' })
+    setShowCheckout(false)
+    
+    showNotification('success', `Pedido ${newOrder.id} realizado com sucesso! Total: €${cartTotal.toFixed(2)}${hasPromotion ? ' (com 30% de desconto aplicado)' : ''}. Receberá um e-mail de confirmação.`)
+  }
+
+  // Função para enviar pergunta
+  const handleSubmitQuestion = () => {
+    if (!questionData.name || !questionData.email || !questionData.question || !selectedProductForQuestion) {
+      showNotification('error', 'Por favor, preencha todos os campos.')
+      return
+    }
+
+    const newQuestion: Question = {
+      id: Date.now().toString(),
+      productId: selectedProductForQuestion.id,
+      productName: selectedProductForQuestion.name,
+      customerName: questionData.name,
+      customerEmail: questionData.email,
+      question: questionData.question,
+      date: new Date().toLocaleDateString('pt-PT'),
+      answered: false
+    }
+
+    setQuestions(prev => [...prev, newQuestion])
+    setQuestionData({ name: '', email: '', question: '' })
+    setShowQuestionDialog(false)
+    setSelectedProductForQuestion(null)
+    
+    showNotification('success', 'Pergunta enviada com sucesso! Responderemos em breve.')
+  }
+
+  // Função para responder pergunta (admin)
+  const handleAnswerQuestion = (questionId: string, answer: string) => {
+    setQuestions(prev =>
+      prev.map(q =>
+        q.id === questionId
+          ? { ...q, answer, answered: true }
+          : q
+      )
+    )
+    showNotification('success', 'Resposta enviada com sucesso!')
+  }
+
   // Cálculos do carrinho com promoção
   const cartItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0)
   const cartSubtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
@@ -331,6 +455,7 @@ export default function PrecosbaixosApp() {
   const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0)
   const totalOrders = orders.length
   const totalProducts = products.length
+  const unansweredQuestions = questions.filter(q => !q.answered).length
 
   // Componente de Notificação
   const NotificationAlert = () => {
@@ -557,7 +682,7 @@ export default function PrecosbaixosApp() {
 
   // Banner de Promoção com animação mais suave
   const PromotionBanner = () => (
-    <div className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 text-white py-4 px-6 mb-8 rounded-2xl shadow-lg relative overflow-hidden">
+    <div className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 text-white py-4 px-6 mb-8 rounded-2xl shadow-lg relative overflow-hidden animate-pulse">
       <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
       <div className="relative z-10 flex items-center justify-center space-x-4">
         <Gift className="w-7 h-7 animate-bounce" />
@@ -573,92 +698,193 @@ export default function PrecosbaixosApp() {
   )
 
   // Componente do Produto com design mais clean e moderno
-  const ProductCard = ({ product }: { product: Product }) => (
-    <Card className="group hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white border-0 shadow-md overflow-hidden rounded-2xl">
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10" />
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-        />
-        {product.originalPrice && (
-          <Badge className="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg z-20 rounded-full">
-            -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
-          </Badge>
-        )}
-        {product.featured && (
-          <Badge className="absolute top-3 right-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg z-20 rounded-full">
-            <Sparkles className="w-3 h-3 mr-1" />
-            Destaque
-          </Badge>
-        )}
-        
-        {/* Overlay com botões de ação */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 z-20">
-          <div className="flex space-x-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-            <Button size="sm" variant="secondary" className="backdrop-blur-md bg-white/90 hover:bg-white shadow-lg rounded-full">
-              <Eye className="w-4 h-4" />
-            </Button>
-            <Button size="sm" variant="secondary" className="backdrop-blur-md bg-white/90 hover:bg-white shadow-lg rounded-full">
-              <Heart className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
-      
-      <CardContent className="p-6 relative">
-        <div className="flex items-start justify-between mb-3">
-          <h3 className="font-semibold text-sm line-clamp-2 flex-1 group-hover:text-blue-600 transition-colors duration-300">{product.name}</h3>
-        </div>
-        
-        <div className="flex items-center space-x-1 mb-3">
-          <div className="flex">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`w-3 h-3 transition-all duration-300 ${
-                  i < Math.floor(product.rating)
-                    ? 'text-yellow-400 fill-current'
-                    : 'text-gray-300'
-                }`}
-              />
-            ))}
-          </div>
-          <span className="text-xs text-gray-500">({product.reviews})</span>
-        </div>
-
-        <div className="flex items-center space-x-2 mb-4">
-          <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            €{product.price.toFixed(2)}
-          </span>
+  const ProductCard = ({ product }: { product: Product }) => {
+    const productQuestions = questions.filter(q => q.productId === product.id && q.answered)
+    
+    return (
+      <Card className="group hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white border-0 shadow-md overflow-hidden rounded-2xl">
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10" />
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+          />
           {product.originalPrice && (
-            <span className="text-sm text-gray-500 line-through">
-              €{product.originalPrice.toFixed(2)}
-            </span>
+            <Badge className="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg z-20 rounded-full">
+              -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+            </Badge>
           )}
+          {product.featured && (
+            <Badge className="absolute top-3 right-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg z-20 rounded-full">
+              <Sparkles className="w-3 h-3 mr-1" />
+              Destaque
+            </Badge>
+          )}
+          
+          {/* Overlay com botões de ação */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 z-20">
+            <div className="flex space-x-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+              <Button 
+                size="sm" 
+                variant="secondary" 
+                className="backdrop-blur-md bg-white/90 hover:bg-white shadow-lg rounded-full"
+                onClick={() => {
+                  setSelectedProductForQuestion(product)
+                  setShowQuestionDialog(true)
+                }}
+              >
+                <MessageCircle className="w-4 h-4" />
+              </Button>
+              <Button size="sm" variant="secondary" className="backdrop-blur-md bg-white/90 hover:bg-white shadow-lg rounded-full">
+                <Heart className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+        
+        <CardContent className="p-6 relative">
+          <div className="flex items-start justify-between mb-3">
+            <h3 className="font-semibold text-sm line-clamp-2 flex-1 group-hover:text-blue-600 transition-colors duration-300">{product.name}</h3>
+          </div>
+          
+          <div className="flex items-center space-x-1 mb-3">
+            <div className="flex">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  className={`w-3 h-3 transition-all duration-300 ${
+                    i < Math.floor(product.rating)
+                      ? 'text-yellow-400 fill-current'
+                      : 'text-gray-300'
+                  }`}
+                />
+              ))}
+            </div>
+            <span className="text-xs text-gray-500">({product.reviews})</span>
+          </div>
+
+          <div className="flex items-center space-x-2 mb-4">
+            <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              €{product.price.toFixed(2)}
+            </span>
+            {product.originalPrice && (
+              <span className="text-sm text-gray-500 line-through">
+                €{product.originalPrice.toFixed(2)}
+              </span>
+            )}
+          </div>
+
+          <Badge 
+            variant={product.inStock ? "secondary" : "destructive"} 
+            className={`text-xs mb-4 rounded-full ${product.inStock ? 'bg-blue-100 text-blue-700' : ''}`}
+          >
+            {product.inStock ? 'Em stock' : 'Fora de stock'}
+          </Badge>
+
+          {/* Mostrar perguntas respondidas */}
+          {productQuestions.length > 0 && (
+            <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+              <p className="text-xs font-medium text-blue-700 mb-1">Pergunta recente:</p>
+              <p className="text-xs text-gray-600 mb-1">"{productQuestions[0].question}"</p>
+              <p className="text-xs text-blue-600">"{productQuestions[0].answer}"</p>
+            </div>
+          )}
+        </CardContent>
+
+        <CardFooter className="p-6 pt-0 space-y-2">
+          <Button
+            onClick={() => addToCart(product)}
+            disabled={!product.inStock}
+            className="w-full transition-all duration-300 hover:scale-105 hover:shadow-lg bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 rounded-full"
+            size="sm"
+          >
+            <ShoppingCart className="w-4 h-4 mr-2" />
+            Adicionar ao Carrinho
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setSelectedProductForQuestion(product)
+              setShowQuestionDialog(true)
+            }}
+            className="w-full transition-all duration-300 hover:scale-105 rounded-full"
+          >
+            <MessageCircle className="w-4 h-4 mr-2" />
+            Fazer Pergunta
+          </Button>
+        </CardFooter>
+      </Card>
+    )
+  }
+
+  // Dialog para Perguntas sobre Produtos
+  const QuestionDialog = () => (
+    <Dialog open={showQuestionDialog} onOpenChange={setShowQuestionDialog}>
+      <DialogContent className="max-w-md rounded-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center space-x-2">
+            <MessageCircle className="w-5 h-5 text-blue-600" />
+            <span>Fazer Pergunta</span>
+          </DialogTitle>
+          <DialogDescription>
+            {selectedProductForQuestion && `Sobre: ${selectedProductForQuestion.name}`}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="question-name">Nome *</Label>
+            <Input
+              id="question-name"
+              placeholder="Seu nome"
+              value={questionData.name}
+              onChange={(e) => setQuestionData(prev => ({ ...prev, name: e.target.value }))}
+              className="focus:ring-2 focus:ring-blue-500 rounded-xl"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="question-email">E-mail *</Label>
+            <Input
+              id="question-email"
+              type="email"
+              placeholder="seu@email.com"
+              value={questionData.email}
+              onChange={(e) => setQuestionData(prev => ({ ...prev, email: e.target.value }))}
+              className="focus:ring-2 focus:ring-blue-500 rounded-xl"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="question-text">Sua Pergunta *</Label>
+            <Textarea
+              id="question-text"
+              placeholder="Digite sua pergunta sobre este produto..."
+              value={questionData.question}
+              onChange={(e) => setQuestionData(prev => ({ ...prev, question: e.target.value }))}
+              className="focus:ring-2 focus:ring-blue-500 rounded-xl"
+              rows={4}
+            />
+          </div>
         </div>
 
-        <Badge 
-          variant={product.inStock ? "secondary" : "destructive"} 
-          className={`text-xs mb-4 rounded-full ${product.inStock ? 'bg-blue-100 text-blue-700' : ''}`}
-        >
-          {product.inStock ? 'Em stock' : 'Fora de stock'}
-        </Badge>
-      </CardContent>
-
-      <CardFooter className="p-6 pt-0">
-        <Button
-          onClick={() => addToCart(product)}
-          disabled={!product.inStock}
-          className="w-full transition-all duration-300 hover:scale-105 hover:shadow-lg bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 rounded-full"
-          size="sm"
-        >
-          <ShoppingCart className="w-4 h-4 mr-2" />
-          Adicionar ao Carrinho
-        </Button>
-      </CardFooter>
-    </Card>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setShowQuestionDialog(false)} className="rounded-full">
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleSubmitQuestion}
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-full"
+          >
+            <Send className="w-4 h-4 mr-2" />
+            Enviar Pergunta
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 
   // Componente do Carrinho
@@ -855,16 +1081,49 @@ export default function PrecosbaixosApp() {
           {/* Formulário de dados */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="name">Nome Completo</Label>
-              <Input id="name" placeholder="Seu nome completo" className="focus:ring-2 focus:ring-blue-500 rounded-xl" />
+              <Label htmlFor="checkout-name">Nome Completo *</Label>
+              <Input 
+                id="checkout-name" 
+                placeholder="Seu nome completo" 
+                value={checkoutData.name}
+                onChange={(e) => setCheckoutData(prev => ({ ...prev, name: e.target.value }))}
+                className="focus:ring-2 focus:ring-blue-500 rounded-xl" 
+              />
             </div>
             <div>
-              <Label htmlFor="email">E-mail</Label>
-              <Input id="email" type="email" placeholder="seu@email.com" className="focus:ring-2 focus:ring-blue-500 rounded-xl" />
+              <Label htmlFor="checkout-email">E-mail *</Label>
+              <Input 
+                id="checkout-email" 
+                type="email" 
+                placeholder="seu@email.com" 
+                value={checkoutData.email}
+                onChange={(e) => setCheckoutData(prev => ({ ...prev, email: e.target.value }))}
+                className="focus:ring-2 focus:ring-blue-500 rounded-xl" 
+              />
+            </div>
+            <div>
+              <Label htmlFor="checkout-phone">Telefone *</Label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input 
+                  id="checkout-phone" 
+                  type="tel" 
+                  placeholder="+351 912 345 678" 
+                  value={checkoutData.phone}
+                  onChange={(e) => setCheckoutData(prev => ({ ...prev, phone: e.target.value }))}
+                  className="pl-10 focus:ring-2 focus:ring-blue-500 rounded-xl" 
+                />
+              </div>
             </div>
             <div className="md:col-span-2">
-              <Label htmlFor="address">Morada de Entrega</Label>
-              <Textarea id="address" placeholder="Rua, número, freguesia, cidade, código postal" className="focus:ring-2 focus:ring-blue-500 rounded-xl" />
+              <Label htmlFor="checkout-address">Morada de Entrega *</Label>
+              <Textarea 
+                id="checkout-address" 
+                placeholder="Rua, número, freguesia, cidade, código postal" 
+                value={checkoutData.address}
+                onChange={(e) => setCheckoutData(prev => ({ ...prev, address: e.target.value }))}
+                className="focus:ring-2 focus:ring-blue-500 rounded-xl" 
+              />
             </div>
           </div>
 
@@ -909,12 +1168,7 @@ export default function PrecosbaixosApp() {
             Voltar
           </Button>
           <Button
-            onClick={() => {
-              // Simular finalização da compra
-              showNotification('success', `Pedido realizado com sucesso! Total: €${cartTotal.toFixed(2)}${hasPromotion ? ' (com 30% de desconto aplicado)' : ''}. Receberá um e-mail de confirmação.`)
-              setCart([])
-              setShowCheckout(false)
-            }}
+            onClick={handleFinalizePurchase}
             className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:scale-105 transition-all duration-300 rounded-full"
           >
             <Zap className="w-4 h-4 mr-2" />
@@ -951,8 +1205,8 @@ export default function PrecosbaixosApp() {
               Compra Segura
             </Badge>
             <Badge variant="secondary" className="bg-white/20 text-white backdrop-blur-sm hover:bg-white/30 transition-all duration-300 rounded-full">
-              <Check className="w-4 h-4 mr-2" />
-              Garantia Total
+              <Headphones className="w-4 h-4 mr-2" />
+              Suporte 24/7
             </Badge>
           </div>
         </div>
@@ -1026,6 +1280,48 @@ export default function PrecosbaixosApp() {
           </div>
         )}
       </div>
+
+      {/* Seção de Confiança */}
+      <div className="mt-16 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8">
+        <div className="text-center mb-8">
+          <h3 className="text-2xl font-bold text-blue-800 mb-4">Por que escolher a Preços Baixos?</h3>
+          <p className="text-gray-600">Milhares de clientes satisfeitos confiam em nós</p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="text-center">
+            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Award className="w-8 h-8 text-blue-600" />
+            </div>
+            <h4 className="font-semibold text-blue-800 mb-2">Qualidade Garantida</h4>
+            <p className="text-sm text-gray-600">Produtos testados e aprovados</p>
+          </div>
+          
+          <div className="text-center">
+            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Truck className="w-8 h-8 text-blue-600" />
+            </div>
+            <h4 className="font-semibold text-blue-800 mb-2">Entrega Rápida</h4>
+            <p className="text-sm text-gray-600">Envio grátis para todo Portugal</p>
+          </div>
+          
+          <div className="text-center">
+            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Headphones className="w-8 h-8 text-blue-600" />
+            </div>
+            <h4 className="font-semibold text-blue-800 mb-2">Suporte 24/7</h4>
+            <p className="text-sm text-gray-600">Atendimento sempre disponível</p>
+          </div>
+          
+          <div className="text-center">
+            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Shield className="w-8 h-8 text-blue-600" />
+            </div>
+            <h4 className="font-semibold text-blue-800 mb-2">Compra Segura</h4>
+            <p className="text-sm text-gray-600">Pagamento 100% protegido</p>
+          </div>
+        </div>
+      </div>
     </div>
   )
 
@@ -1038,6 +1334,10 @@ export default function PrecosbaixosApp() {
             Painel Administrativo
           </h2>
           <p className="text-gray-600">Gerencie sua loja, produtos e categorias de forma intuitiva</p>
+          <Badge variant="secondary" className="mt-2 bg-green-100 text-green-700">
+            <Check className="w-3 h-3 mr-1" />
+            Auto-save ativado
+          </Badge>
         </div>
         <div className="flex items-center space-x-2 text-sm text-gray-500">
           <User className="w-4 h-4" />
@@ -1046,7 +1346,7 @@ export default function PrecosbaixosApp() {
       </div>
 
       <Tabs defaultValue="dashboard" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
+        <TabsList className="grid w-full grid-cols-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
           <TabsTrigger value="dashboard" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-700 data-[state=active]:text-white rounded-lg">
             Dashboard
           </TabsTrigger>
@@ -1059,6 +1359,9 @@ export default function PrecosbaixosApp() {
           <TabsTrigger value="orders" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-700 data-[state=active]:text-white rounded-lg">
             Pedidos
           </TabsTrigger>
+          <TabsTrigger value="questions" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-700 data-[state=active]:text-white rounded-lg">
+            Perguntas {unansweredQuestions > 0 && <Badge className="ml-1 bg-red-500">{unansweredQuestions}</Badge>}
+          </TabsTrigger>
           <TabsTrigger value="customers" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-700 data-[state=active]:text-white rounded-lg">
             Clientes
           </TabsTrigger>
@@ -1066,7 +1369,7 @@ export default function PrecosbaixosApp() {
 
         {/* Dashboard */}
         <TabsContent value="dashboard" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Card className="hover:shadow-lg transition-all duration-300 hover:scale-105 bg-gradient-to-br from-green-50 to-blue-50 border-blue-200 rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-blue-800">Receita Total</CardTitle>
@@ -1099,6 +1402,17 @@ export default function PrecosbaixosApp() {
                 <p className="text-xs text-purple-600">Catálogo ativo</p>
               </CardContent>
             </Card>
+
+            <Card className="hover:shadow-lg transition-all duration-300 hover:scale-105 bg-gradient-to-br from-orange-50 to-red-50 border-orange-200 rounded-2xl">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-orange-800">Perguntas</CardTitle>
+                <MessageCircle className="h-4 w-4 text-orange-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-orange-600">{questions.length}</div>
+                <p className="text-xs text-orange-600">{unansweredQuestions} pendentes</p>
+              </CardContent>
+            </Card>
           </div>
 
           <Card className="shadow-lg rounded-2xl">
@@ -1114,7 +1428,7 @@ export default function PrecosbaixosApp() {
                 <h3 className="text-xl font-semibold text-blue-800 mb-2">Loja Pronta para Vendas!</h3>
                 <p className="text-gray-600 mb-4">
                   Sua aplicação está configurada e pronta para receber clientes. 
-                  Adicione produtos, gerencie categorias e comece a vender!
+                  Todas as alterações são salvas automaticamente!
                 </p>
                 <div className="flex justify-center space-x-4">
                   <Button 
@@ -1269,6 +1583,10 @@ export default function PrecosbaixosApp() {
                       <div>
                         <h4 className="font-semibold text-lg text-blue-800">{order.id}</h4>
                         <p className="text-gray-600">{order.customerName} - {order.customerEmail}</p>
+                        <p className="text-sm text-gray-500 flex items-center">
+                          <Phone className="w-3 h-3 mr-1" />
+                          {order.customerPhone}
+                        </p>
                         <p className="text-sm text-gray-500">{order.date}</p>
                       </div>
                       <div className="flex items-center space-x-4 mt-4 md:mt-0">
@@ -1313,6 +1631,93 @@ export default function PrecosbaixosApp() {
           )}
         </TabsContent>
 
+        {/* Perguntas */}
+        <TabsContent value="questions" className="space-y-6">
+          <div>
+            <h3 className="text-xl font-semibold text-blue-800">Perguntas dos Clientes</h3>
+            <p className="text-sm text-gray-600">Responda às perguntas sobre seus produtos</p>
+          </div>
+          
+          {questions.length === 0 ? (
+            <Card className="shadow-lg rounded-2xl">
+              <CardContent className="p-12 text-center">
+                <div className="text-6xl mb-4">💬</div>
+                <h3 className="text-xl font-semibold text-blue-800 mb-2">Nenhuma Pergunta Ainda</h3>
+                <p className="text-gray-600 mb-4">
+                  Quando os clientes fizerem perguntas sobre produtos, elas aparecerão aqui.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {questions.map((question) => (
+                <Card key={question.id} className={`hover:shadow-xl transition-all duration-300 hover:scale-[1.02] rounded-2xl ${
+                  !question.answered ? 'bg-gradient-to-br from-orange-50 to-red-50 border-orange-200' : 'bg-gradient-to-br from-white to-blue-50'
+                }`}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <h4 className="font-semibold text-blue-800">{question.productName}</h4>
+                          <Badge variant={question.answered ? "secondary" : "destructive"} className="text-xs">
+                            {question.answered ? 'Respondida' : 'Pendente'}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">
+                          <strong>Cliente:</strong> {question.customerName} ({question.customerEmail})
+                        </p>
+                        <p className="text-sm text-gray-500 mb-3">{question.date}</p>
+                        
+                        <div className="bg-gray-50 p-3 rounded-lg mb-4">
+                          <p className="text-sm"><strong>Pergunta:</strong> {question.question}</p>
+                        </div>
+                        
+                        {question.answered && question.answer && (
+                          <div className="bg-blue-50 p-3 rounded-lg">
+                            <p className="text-sm"><strong>Resposta:</strong> {question.answer}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {!question.answered && (
+                      <div className="border-t pt-4">
+                        <div className="flex space-x-2">
+                          <Input
+                            placeholder="Digite sua resposta..."
+                            className="flex-1 focus:ring-2 focus:ring-blue-500 rounded-xl"
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                const input = e.target as HTMLInputElement
+                                if (input.value.trim()) {
+                                  handleAnswerQuestion(question.id, input.value.trim())
+                                  input.value = ''
+                                }
+                              }
+                            }}
+                          />
+                          <Button
+                            onClick={(e) => {
+                              const input = (e.target as HTMLElement).parentElement?.querySelector('input') as HTMLInputElement
+                              if (input?.value.trim()) {
+                                handleAnswerQuestion(question.id, input.value.trim())
+                                input.value = ''
+                              }
+                            }}
+                            className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 rounded-full"
+                          >
+                            <Send className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
         {/* Clientes */}
         <TabsContent value="customers" className="space-y-6">
           <div>
@@ -1341,6 +1746,7 @@ export default function PrecosbaixosApp() {
               {Array.from(new Set(orders.map(o => o.customerEmail))).map((email, index) => {
                 const customerOrders = orders.filter(o => o.customerEmail === email)
                 const customerName = customerOrders[0]?.customerName
+                const customerPhone = customerOrders[0]?.customerPhone
                 const totalSpent = customerOrders.reduce((sum, order) => sum + order.total, 0)
                 
                 return (
@@ -1354,7 +1760,14 @@ export default function PrecosbaixosApp() {
                         </Avatar>
                         <div>
                           <h4 className="font-semibold text-blue-800">{customerName}</h4>
-                          <p className="text-sm text-gray-600">{email}</p>
+                          <p className="text-sm text-gray-600 flex items-center">
+                            <Mail className="w-3 h-3 mr-1" />
+                            {email}
+                          </p>
+                          <p className="text-sm text-gray-600 flex items-center">
+                            <Phone className="w-3 h-3 mr-1" />
+                            {customerPhone}
+                          </p>
                         </div>
                       </div>
                       
@@ -1667,6 +2080,7 @@ export default function PrecosbaixosApp() {
       
       <CartDialog />
       <CheckoutDialog />
+      <QuestionDialog />
       <NotificationAlert />
 
       {/* Footer com botão admin discreto */}
