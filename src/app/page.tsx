@@ -65,7 +65,7 @@ const sampleProducts: Product[] = [
     name: 'CARREGADOR PARA O CARRO',
     price: 15,
     originalPrice: 25,
-    image: https://img.kwcdn.com/product/fancy/10470504-9926-43c1-9856-acef92c6672d.jpg?imageView2/2/w/800/q/70/format/avif',
+    image: 'https://img.kwcdn.com/product/fancy/170036ee-63ae-438d-8d6c-1334fa0d7406.jpg?imageView2/2/w/300/q/70/format/avif' ,
     category: 'Acessórios para Carros',
     description: 'Carregador de Telemóvel Retrátil (Para isqueiro do carro) 4 em 1 com Carregamento Rápido de 66W e Projetor Estrelar LED, com Cabo Retrátil para Carregar Telemóveis.Design inovador roda 180º. Acabe com os fios todos espalhados no seu carro. Aproveite a promoção. Possui Duas Portas USB para Carregar Quatro Dispositivos Simultaneamente e é Compatível com iPhone 16/15/14/13/13 Pro.',
     rating: 4.8,
