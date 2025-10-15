@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { ShoppingCart, Plus, Minus, Package, Users, DollarSign, TrendingUp, Search, Filter, Star, Heart, Eye, Edit, Trash2, X, Check, CreditCard, Truck, Shield, Menu, Sparkles, Zap, Gift, Percent, Lock, User, MessageCircle, Send, Phone, Mail, MapPin, Clock, Award, Headphones } from 'lucide-react'
+import { ShoppingCart, Plus, Minus, Package, Users, DollarSign, TrendingUp, Search, Filter, Star, Heart, Eye, Edit, Trash2, X, Check, CreditCard, Truck, Shield, Menu, Sparkles, Zap, Gift, Percent, Lock, User, MessageCircle, Send, Phone, Mail, MapPin, Clock, Award, Headphones, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -21,7 +21,7 @@ interface Product {
   name: string
   price: number
   originalPrice?: number
-  image: string
+  images: string[]
   category: string
   description: string
   rating: number
@@ -58,70 +58,97 @@ interface Question {
   answered: boolean
 }
 
+// Função utilitária para garantir que um valor seja um número
+const ensureNumber = (value: any): number => {
+  if (typeof value === 'number' && !isNaN(value)) {
+    return value
+  }
+  const parsed = parseFloat(value)
+  return isNaN(parsed) ? 0 : parsed
+}
+
+// Função utilitária para formatar preços
+const formatPrice = (price: any): string => {
+  return ensureNumber(price).toFixed(2)
+}
+
 // Dados de exemplo
 const sampleProducts: Product[] = [
   {
     id: '1',
-    name: 'CARREGADOR PARA O CARRO',
-    price: '15',
-    originalPrice: '25',
-    image: 'https://img.kwcdn.com/product/fancy/170036ee-63ae-438d-8d6c-1334fa0d7406.jpg?imageView2/2/w/300/q/70/format/avif' ,
+    name: 'Organizador de Porta-Malas Premium',
+    price: 89.90,
+    originalPrice: 149.90,
+    images: [
+      'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=400&fit=crop',
+      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop',
+      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=400&fit=crop'
+    ],
     category: 'Acessórios para Carros',
-    description: 'Carregador de Telemóvel Retrátil (Para isqueiro do carro) 4 em 1 com Carregamento Rápido de 66W e Projetor Estrelar LED, com Cabo Retrátil para Carregar Telemóveis.Design inovador roda 180º. Acabe com os fios todos espalhados no seu carro. Aproveite a promoção. Possui Duas Portas USB para Carregar Quatro Dispositivos Simultaneamente e é Compatível com iPhone 16/15/14/13/13 Pro.',
+    description: 'Organizador dobrável com múltiplos compartimentos para manter seu porta-malas sempre organizado. Feito com material resistente e impermeável, possui divisórias ajustáveis e alças reforçadas para fácil transporte.',
     rating: 4.8,
     reviews: 234,
     inStock: true,
-    featured: true 
+    featured: true
   },
   {
     id: '2',
-    name: 'Humidificador/Difusor de fumo',
-    price: '8.99',
-    originalPrice: '15.99',
-    image:'https://img.kwcdn.com/product/fancy/de6c5061-8d65-4e30-9f3f-21a720651430.jpg?imageView2/2/w/800/q/70/format/avif',
-    category: 'Itens para Casa',
-    description: 'Difusor de Máquina de Vapor de Óleo Essencial e Humidificador com Luz Noturna Colorida, Função de Máquina de Vapor Frio, Refresque e Purifique a Sua Sala com uma Atmosfera Confortável, Humidificador para Casa, Quarto, Decoração de Sala de Estar, Humidificador de Quarto | Estética Moderna | Difusor Colorido, Difusor de Óleo Essencial.',
+    name: 'Suporte Magnético para Telemóvel',
+    price: 34.90,
+    originalPrice: 59.90,
+    images: [
+      'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=400&fit=crop',
+      'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=400&fit=crop'
+    ],
+    category: 'Acessórios para Carros',
+    description: 'Suporte magnético universal para smartphone com rotação 360°. Compatível com todos os dispositivos, instalação fácil no painel ou para-brisas.',
     rating: 4.6,
     reviews: 189,
     inStock: true,
-    featured: true 
-
+    featured: true
   },
   {
     id: '3',
-    name: '2 Lixos Automáticos e Inteligentes',
-    price: '30.00',
-    originalPrice: '40.99',
-    image: 'https://img.kwcdn.com/product/fancy/8808dece-12a6-408e-969e-fa63ac5a53ee.jpg?imageView2/2/w/800/q/70/format/avif',
+    name: 'Kit Organizador de Gavetas',
+    price: 45.90,
+    originalPrice: 79.90,
+    images: [
+      'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop',
+      'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=400&fit=crop'
+    ],
     category: 'Itens para Casa',
-    description: '2 Peças Lixo para Casa de Banho ou Quarto Sem Toque com Tampa, Branca - Sensor Inteligente, 11.02L Automática e Estreita para Quarto, Escritório ou Salão. Plástico Eletrônico Abertura por Movimento, Lixeira Automática,Lixeira Automática,Lixeira de Banheiro, Facil de Limpar,Plástico Durável,Uso Doméstico,Espaços Pequenos.',
+    description: 'Conjunto de organizadores ajustáveis para gavetas de cozinha e casa de banho. Material durável e fácil de limpar.',
     rating: 4.7,
     reviews: 156,
     inStock: true,
     featured: false
-
   },
   {
     id: '4',
-    name: 'Lata de lixo com sensor automático e inteligente',
-    price: '20.00',
-    originalPrice: '30.00',
-    image: 'https://img.kwcdn.com/product/fancy/8808dece-12a6-408e-969e-fa63ac5a53ee.jpg?imageView2/2/w/800/q/70/format/avif',
-    category: 'Itens para Casa',
-    description: 'Lata de lixo com sensor automático de 1 unidade com operação sem mãos - Lata de lixo sem toque, design fino que poupa espaço, alimentada por bateria (baterias não incluídas) - para casa, escritório, cozinha, casa de banho, restaurante - Cesto de lixo branco moderno, lata de lixo de escritório, design minimalista, construção durável, alternativa sem toque, trabalhadores de escritório, lata de lixo automática, lata de lixo inteligente para casa de banho, lata de lixo para casa de banho pequena',
-    rating: 4.7,
-    reviews: 156,
+    name: 'Carregador Veicular Turbo',
+    price: 29.90,
+    originalPrice: 49.90,
+    images: [
+      'https://images.unsplash.com/photo-1609592806596-4d3b0c3b4b5e?w=400&h=400&fit=crop'
+    ],
+    category: 'Acessórios para Carros',
+    description: 'Carregador veicular com 2 portas USB e carregamento rápido. Proteção contra sobrecarga e design compacto.',
+    rating: 4.5,
+    reviews: 298,
     inStock: true,
     featured: false
   },
   {
     id: '5',
-    name: 'Conjunto 3 tabuleiros de corte em aço inoxidável',
-    price: '25.00',
-    originalPrice: '35.00',
-    image: 'https://img.kwcdn.com/product/fancy/1125315f-0aa0-4eba-85b9-81c56b0f504b.jpg?imageView2/2/w/800/q/70/format/avif',
+    name: 'Luminária LED com Sensor',
+    price: 67.90,
+    originalPrice: 99.90,
+    images: [
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop',
+      'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop'
+    ],
     category: 'Itens para Casa',
-    description: 'Conjunto de 3 tabuleiros de corte em aço inoxidável espessado - Tabuleiro de corte de cozinha de dupla face - Adequado para carne/frutas/legumes - Superfície de faca amigável para máquina de lavar louça - Adequado para casa, restaurante ou hotel.',
+    description: 'Luminária LED com sensor de movimento e bateria recarregável. Ideal para corredores, escadas e armários.',
     rating: 4.9,
     reviews: 87,
     inStock: true,
@@ -129,16 +156,18 @@ const sampleProducts: Product[] = [
   },
   {
     id: '6',
-    name: 'Conjunto de 4 Luzes Solares',
-    price: '10.99',
-    originalPrice: '19.99',
-    image: 'https://img.kwcdn.com/product/fancy/d2878033-3271-4e7d-8138-041ccf5debd8.jpg?imageView2/2/w/800/q/70/format/avif',
+    name: 'Tapete Antiderrapante Premium',
+    price: 39.90,
+    originalPrice: 69.90,
+    images: [
+      'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop'
+    ],
     category: 'Itens para Casa',
-    description: 'Conjunto de 4 Luzes Solares para Deck, Luzes Solares para Cerca, Luzes Externas para Pátio IP44, Luzes Solares com Energia Solar, Luz Solar para Escadas Exteriores, Iluminação Solar para Cercas e Degraus',
-    rating: 4.9,
-    reviews: 87,
-    inStock: true,
-    featured: true
+    description: 'Tapete antiderrapante para casa de banho com design moderno. Material absorvente e secagem rápida.',
+    rating: 4.4,
+    reviews: 123,
+    inStock: false,
+    featured: false
   }
 ]
 
@@ -148,13 +177,17 @@ export default function PrecosbaixosApp() {
   const [loginCredentials, setLoginCredentials] = useState({ username: '', password: '' })
   const [products, setProducts] = useState<Product[]>(sampleProducts)
   const [cart, setCart] = useState<CartItem[]>([])
+  const [wishlist, setWishlist] = useState<Product[]>([])
   const [orders, setOrders] = useState<Order[]>([])
   const [questions, setQuestions] = useState<Question[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [showCart, setShowCart] = useState(false)
+  const [showWishlist, setShowWishlist] = useState(false)
   const [showCheckout, setShowCheckout] = useState(false)
   const [showQuestionDialog, setShowQuestionDialog] = useState(false)
+  const [showProductDetail, setShowProductDetail] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [selectedProductForQuestion, setSelectedProductForQuestion] = useState<Product | null>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [notification, setNotification] = useState<{ type: 'success' | 'error' | 'info', message: string } | null>(null)
@@ -167,7 +200,7 @@ export default function PrecosbaixosApp() {
     originalPrice: '',
     category: '',
     description: '',
-    image: '',
+    images: [''],
     featured: false
   })
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
@@ -191,6 +224,9 @@ export default function PrecosbaixosApp() {
     question: ''
   })
 
+  // Estados para galeria de imagens
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+
   // Auto-save para mudanças no admin
   useEffect(() => {
     if (isAuthenticated) {
@@ -200,11 +236,12 @@ export default function PrecosbaixosApp() {
         localStorage.setItem('categories', JSON.stringify(categories))
         localStorage.setItem('orders', JSON.stringify(orders))
         localStorage.setItem('questions', JSON.stringify(questions))
+        localStorage.setItem('wishlist', JSON.stringify(wishlist))
       }, 1000)
 
       return () => clearTimeout(autoSaveTimer)
     }
-  }, [products, categories, orders, questions, isAuthenticated])
+  }, [products, categories, orders, questions, wishlist, isAuthenticated])
 
   // Carregar dados salvos
   useEffect(() => {
@@ -212,11 +249,13 @@ export default function PrecosbaixosApp() {
     const savedCategories = localStorage.getItem('categories')
     const savedOrders = localStorage.getItem('orders')
     const savedQuestions = localStorage.getItem('questions')
+    const savedWishlist = localStorage.getItem('wishlist')
 
     if (savedProducts) setProducts(JSON.parse(savedProducts))
     if (savedCategories) setCategories(JSON.parse(savedCategories))
     if (savedOrders) setOrders(JSON.parse(savedOrders))
     if (savedQuestions) setQuestions(JSON.parse(savedQuestions))
+    if (savedWishlist) setWishlist(JSON.parse(savedWishlist))
   }, [])
 
   // Sistema de notificações
@@ -288,6 +327,31 @@ export default function PrecosbaixosApp() {
     )
   }
 
+  // Funções da wishlist
+  const addToWishlist = (product: Product) => {
+    setWishlist(prev => {
+      const existing = prev.find(item => item.id === product.id)
+      if (existing) {
+        showNotification('info', `${product.name} já está na sua lista de desejos!`)
+        return prev
+      }
+      showNotification('success', `${product.name} adicionado à lista de desejos!`)
+      return [...prev, product]
+    })
+  }
+
+  const removeFromWishlist = (productId: string) => {
+    const product = wishlist.find(item => item.id === productId)
+    setWishlist(prev => prev.filter(item => item.id !== productId))
+    if (product) {
+      showNotification('info', `${product.name} removido da lista de desejos.`)
+    }
+  }
+
+  const isInWishlist = (productId: string) => {
+    return wishlist.some(item => item.id === productId)
+  }
+
   // Funções admin para categorias
   const handleAddCategory = () => {
     if (!newCategory.trim()) {
@@ -316,11 +380,11 @@ export default function PrecosbaixosApp() {
     const product: Product = {
       id: Date.now().toString(),
       name: newProduct.name,
-      price: parseFloat(newProduct.price),
-      originalPrice: newProduct.originalPrice ? parseFloat(newProduct.originalPrice) : undefined,
+      price: ensureNumber(newProduct.price),
+      originalPrice: newProduct.originalPrice ? ensureNumber(newProduct.originalPrice) : undefined,
       category: newProduct.category,
       description: newProduct.description,
-      image: newProduct.image || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=400&fit=crop',
+      images: newProduct.images.filter(img => img.trim() !== '') || ['https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=400&fit=crop'],
       rating: 4.5,
       reviews: 0,
       inStock: true,
@@ -334,7 +398,7 @@ export default function PrecosbaixosApp() {
       originalPrice: '',
       category: '',
       description: '',
-      image: '',
+      images: [''],
       featured: false
     })
     setShowAddProduct(false)
@@ -344,14 +408,21 @@ export default function PrecosbaixosApp() {
   const handleEditProduct = () => {
     if (!editingProduct) return
 
+    // Garantir que os preços sejam números
+    const updatedProduct = {
+      ...editingProduct,
+      price: ensureNumber(editingProduct.price),
+      originalPrice: editingProduct.originalPrice ? ensureNumber(editingProduct.originalPrice) : undefined
+    }
+
     setProducts(prev =>
       prev.map(product =>
-        product.id === editingProduct.id ? editingProduct : product
+        product.id === updatedProduct.id ? updatedProduct : product
       )
     )
     setEditingProduct(null)
     setShowEditProduct(false)
-    showNotification('success', `Produto "${editingProduct.name}" atualizado com sucesso!`)
+    showNotification('success', `Produto "${updatedProduct.name}" atualizado com sucesso!`)
   }
 
   const handleDeleteProduct = (productId: string) => {
@@ -394,7 +465,7 @@ export default function PrecosbaixosApp() {
       customerEmail: checkoutData.email,
       customerPhone: checkoutData.phone,
       items: [...cart],
-      total: cartTotal,
+      total: ensureNumber(cartTotal),
       status: 'pending',
       date: new Date().toLocaleDateString('pt-PT'),
       shippingAddress: checkoutData.address
@@ -405,7 +476,7 @@ export default function PrecosbaixosApp() {
     setCheckoutData({ name: '', email: '', phone: '', address: '' })
     setShowCheckout(false)
     
-    showNotification('success', `Pedido ${newOrder.id} realizado com sucesso! Total: €${cartTotal.toFixed(2)}${hasPromotion ? ' (com 30% de desconto aplicado)' : ''}. Receberá um e-mail de confirmação.`)
+    showNotification('success', `Pedido ${newOrder.id} realizado com sucesso! Total: €${formatPrice(cartTotal)}${hasPromotion ? ' (com 10% de desconto aplicado)' : ''}. Receberá um e-mail de confirmação.`)
   }
 
   // Função para enviar pergunta
@@ -446,15 +517,15 @@ export default function PrecosbaixosApp() {
     showNotification('success', 'Resposta enviada com sucesso!')
   }
 
-  // Cálculos do carrinho com promoção
+  // Cálculos do carrinho com promoção atualizada
   const cartItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0)
-  const cartSubtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-  const hasPromotion = cartItemsCount >= 3
-  const promotionDiscount = hasPromotion ? cartSubtotal * 0.30 : 0
+  const cartSubtotal = cart.reduce((sum, item) => sum + (ensureNumber(item.price) * item.quantity), 0)
+  const hasPromotion = cartItemsCount >= 2
+  const promotionDiscount = hasPromotion ? cartSubtotal * 0.10 : 0
   const cartTotal = cartSubtotal - promotionDiscount
 
   // Estatísticas do admin
-  const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0)
+  const totalRevenue = orders.reduce((sum, order) => sum + ensureNumber(order.total), 0)
   const totalOrders = orders.length
   const totalProducts = products.length
   const unansweredQuestions = questions.filter(q => !q.answered).length
@@ -612,19 +683,34 @@ export default function PrecosbaixosApp() {
             )}
             
             {currentView === 'store' && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowCart(true)}
-                className="relative transition-all duration-300 hover:scale-110 hover:shadow-lg"
-              >
-                <ShoppingCart className="w-4 h-4" />
-                {cartItemsCount > 0 && (
-                  <Badge className="absolute -top-2 -right-2 w-5 h-5 rounded-full p-0 flex items-center justify-center text-xs animate-bounce bg-gradient-to-r from-blue-500 to-indigo-600">
-                    {cartItemsCount}
-                  </Badge>
-                )}
-              </Button>
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowWishlist(true)}
+                  className="relative transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                >
+                  <Heart className="w-4 h-4" />
+                  {wishlist.length > 0 && (
+                    <Badge className="absolute -top-2 -right-2 w-5 h-5 rounded-full p-0 flex items-center justify-center text-xs animate-bounce bg-gradient-to-r from-pink-500 to-red-600">
+                      {wishlist.length}
+                    </Badge>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCart(true)}
+                  className="relative transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  {cartItemsCount > 0 && (
+                    <Badge className="absolute -top-2 -right-2 w-5 h-5 rounded-full p-0 flex items-center justify-center text-xs animate-bounce bg-gradient-to-r from-blue-500 to-indigo-600">
+                      {cartItemsCount}
+                    </Badge>
+                  )}
+                </Button>
+              </>
             )}
 
             <Button
@@ -682,7 +768,7 @@ export default function PrecosbaixosApp() {
     </header>
   )
 
-  // Banner de Promoção com animação mais suave
+  // Banner de Promoção atualizado
   const PromotionBanner = () => (
     <div className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 text-white py-4 px-6 mb-8 rounded-2xl shadow-lg relative overflow-hidden animate-pulse">
       <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
@@ -690,7 +776,7 @@ export default function PrecosbaixosApp() {
         <Gift className="w-7 h-7 animate-bounce" />
         <div className="text-center">
           <p className="font-bold text-xl mb-1">🎉 PROMOÇÃO ESPECIAL! 🎉</p>
-          <p className="text-sm opacity-95">Compre 3 artigos e receba 30% de desconto imediato!</p>
+          <p className="text-sm opacity-95">Compre Hoje 2 artigos e receba 10% de Desconto Extra!</p>
         </div>
         <Percent className="w-7 h-7 animate-bounce" />
       </div>
@@ -708,13 +794,13 @@ export default function PrecosbaixosApp() {
         <div className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10" />
           <img
-            src={product.image}
+            src={product.images[0]}
             alt={product.name}
             className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
           />
           {product.originalPrice && (
             <Badge className="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg z-20 rounded-full">
-              -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+              -{Math.round(((ensureNumber(product.originalPrice) - ensureNumber(product.price)) / ensureNumber(product.originalPrice)) * 100)}%
             </Badge>
           )}
           {product.featured && (
@@ -738,8 +824,23 @@ export default function PrecosbaixosApp() {
               >
                 <MessageCircle className="w-4 h-4" />
               </Button>
-              <Button size="sm" variant="secondary" className="backdrop-blur-md bg-white/90 hover:bg-white shadow-lg rounded-full">
-                <Heart className="w-4 h-4" />
+              <Button 
+                size="sm" 
+                variant="secondary" 
+                className={`backdrop-blur-md shadow-lg rounded-full ${
+                  isInWishlist(product.id) 
+                    ? 'bg-pink-100 hover:bg-pink-200 text-pink-600' 
+                    : 'bg-white/90 hover:bg-white'
+                }`}
+                onClick={() => {
+                  if (isInWishlist(product.id)) {
+                    removeFromWishlist(product.id)
+                  } else {
+                    addToWishlist(product)
+                  }
+                }}
+              >
+                <Heart className={`w-4 h-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
               </Button>
             </div>
           </div>
@@ -768,11 +869,11 @@ export default function PrecosbaixosApp() {
 
           <div className="flex items-center space-x-2 mb-4">
             <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              €{product.price.toFixed(2)}
+              €{formatPrice(product.price)}
             </span>
             {product.originalPrice && (
               <span className="text-sm text-gray-500 line-through">
-                €{product.originalPrice.toFixed(2)}
+                €{formatPrice(product.originalPrice)}
               </span>
             )}
           </div>
@@ -795,32 +896,276 @@ export default function PrecosbaixosApp() {
         </CardContent>
 
         <CardFooter className="p-6 pt-0 space-y-2">
-          <Button
-            onClick={() => addToCart(product)}
-            disabled={!product.inStock}
-            className="w-full transition-all duration-300 hover:scale-105 hover:shadow-lg bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 rounded-full"
-            size="sm"
-          >
-            <ShoppingCart className="w-4 h-4 mr-2" />
-            Adicionar ao Carrinho
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setSelectedProductForQuestion(product)
-              setShowQuestionDialog(true)
-            }}
-            className="w-full transition-all duration-300 hover:scale-105 rounded-full"
-          >
-            <MessageCircle className="w-4 h-4 mr-2" />
-            Fazer Pergunta
-          </Button>
+          <div className="flex space-x-2">
+            <Button
+              onClick={() => addToCart(product)}
+              disabled={!product.inStock}
+              className="flex-1 transition-all duration-300 hover:scale-105 hover:shadow-lg bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 rounded-full"
+              size="sm"
+            >
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Adicionar ao Carrinho
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setSelectedProduct(product)
+                setCurrentImageIndex(0)
+                setShowProductDetail(true)
+              }}
+              className="px-3 transition-all duration-300 hover:scale-105 rounded-full"
+            >
+              <Eye className="w-4 h-4" />
+            </Button>
+          </div>
         </CardFooter>
       </Card>
     )
   }
+
+  // Dialog para Detalhes do Produto
+  const ProductDetailDialog = () => (
+    <Dialog open={showProductDetail} onOpenChange={setShowProductDetail}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl">
+        {selectedProduct && (
+          <>
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold text-blue-800">
+                {selectedProduct.name}
+              </DialogTitle>
+              <DialogDescription>
+                {selectedProduct.category}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Galeria de Imagens */}
+              <div className="space-y-4">
+                <div className="relative">
+                  <img
+                    src={selectedProduct.images[currentImageIndex]}
+                    alt={selectedProduct.name}
+                    className="w-full h-80 object-cover rounded-xl"
+                  />
+                  {selectedProduct.images.length > 1 && (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="absolute left-2 top-1/2 transform -translate-y-1/2 rounded-full bg-white/80 backdrop-blur-sm"
+                        onClick={() => setCurrentImageIndex(prev => 
+                          prev === 0 ? selectedProduct.images.length - 1 : prev - 1
+                        )}
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 rounded-full bg-white/80 backdrop-blur-sm"
+                        onClick={() => setCurrentImageIndex(prev => 
+                          prev === selectedProduct.images.length - 1 ? 0 : prev + 1
+                        )}
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    </>
+                  )}
+                </div>
+                
+                {/* Miniaturas */}
+                {selectedProduct.images.length > 1 && (
+                  <div className="flex space-x-2 overflow-x-auto">
+                    {selectedProduct.images.map((image, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentImageIndex(index)}
+                        className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-300 ${
+                          currentImageIndex === index 
+                            ? 'border-blue-500 scale-105' 
+                            : 'border-gray-200 hover:border-blue-300'
+                        }`}
+                      >
+                        <img
+                          src={image}
+                          alt={`${selectedProduct.name} ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Informações do Produto */}
+              <div className="space-y-6">
+                <div className="flex items-center space-x-1 mb-3">
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-4 h-4 transition-all duration-300 ${
+                          i < Math.floor(selectedProduct.rating)
+                            ? 'text-yellow-400 fill-current'
+                            : 'text-gray-300'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm text-gray-500">({selectedProduct.reviews} avaliações)</span>
+                </div>
+
+                <div className="flex items-center space-x-3 mb-4">
+                  <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                    €{formatPrice(selectedProduct.price)}
+                  </span>
+                  {selectedProduct.originalPrice && (
+                    <span className="text-xl text-gray-500 line-through">
+                      €{formatPrice(selectedProduct.originalPrice)}
+                    </span>
+                  )}
+                </div>
+
+                <Badge 
+                  variant={selectedProduct.inStock ? "secondary" : "destructive"} 
+                  className={`text-sm rounded-full ${selectedProduct.inStock ? 'bg-blue-100 text-blue-700' : ''}`}
+                >
+                  {selectedProduct.inStock ? 'Em stock' : 'Fora de stock'}
+                </Badge>
+
+                <div>
+                  <h3 className="font-semibold text-lg mb-3 text-blue-800">Descrição</h3>
+                  <p className="text-gray-700 leading-relaxed">{selectedProduct.description}</p>
+                </div>
+
+                <div className="space-y-3">
+                  <Button
+                    onClick={() => {
+                      addToCart(selectedProduct)
+                      setShowProductDetail(false)
+                    }}
+                    disabled={!selectedProduct.inStock}
+                    className="w-full transition-all duration-300 hover:scale-105 hover:shadow-lg bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 rounded-full"
+                  >
+                    <ShoppingCart className="w-4 h-4 mr-2" />
+                    Adicionar ao Carrinho
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      if (isInWishlist(selectedProduct.id)) {
+                        removeFromWishlist(selectedProduct.id)
+                      } else {
+                        addToWishlist(selectedProduct)
+                      }
+                    }}
+                    className={`w-full transition-all duration-300 hover:scale-105 rounded-full ${
+                      isInWishlist(selectedProduct.id) 
+                        ? 'bg-pink-50 border-pink-300 text-pink-600 hover:bg-pink-100' 
+                        : ''
+                    }`}
+                  >
+                    <Heart className={`w-4 h-4 mr-2 ${isInWishlist(selectedProduct.id) ? 'fill-current' : ''}`} />
+                    {isInWishlist(selectedProduct.id) ? 'Remover dos Favoritos' : 'Adicionar aos Favoritos'}
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedProductForQuestion(selectedProduct)
+                      setShowProductDetail(false)
+                      setShowQuestionDialog(true)
+                    }}
+                    className="w-full transition-all duration-300 hover:scale-105 rounded-full"
+                  >
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Fazer Pergunta
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+  )
+
+  // Dialog para Lista de Desejos
+  const WishlistDialog = () => (
+    <Dialog open={showWishlist} onOpenChange={setShowWishlist}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto rounded-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center space-x-2">
+            <Heart className="w-5 h-5 text-pink-600" />
+            <span>Lista de Desejos</span>
+          </DialogTitle>
+          <DialogDescription>
+            {wishlist.length} {wishlist.length === 1 ? 'produto' : 'produtos'} na sua lista
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {wishlist.length === 0 ? (
+            <div className="text-center py-8">
+              <Heart className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-500">Sua lista de desejos está vazia</p>
+            </div>
+          ) : (
+            wishlist.map((item) => (
+              <div key={item.id} className="flex items-center space-x-4 p-4 border rounded-xl hover:shadow-md transition-shadow duration-300">
+                <img
+                  src={item.images[0]}
+                  alt={item.name}
+                  className="w-16 h-16 object-cover rounded-lg"
+                />
+                <div className="flex-1">
+                  <h4 className="font-medium text-sm">{item.name}</h4>
+                  <p className="text-blue-600 font-semibold">€{formatPrice(item.price)}</p>
+                  <Badge 
+                    variant={item.inStock ? "secondary" : "destructive"} 
+                    className="text-xs mt-1"
+                  >
+                    {item.inStock ? 'Em stock' : 'Fora de stock'}
+                  </Badge>
+                </div>
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      addToCart(item)
+                      removeFromWishlist(item.id)
+                    }}
+                    disabled={!item.inStock}
+                    className="hover:scale-110 transition-transform rounded-full"
+                  >
+                    <ShoppingCart className="w-3 h-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeFromWishlist(item.id)}
+                    className="hover:scale-110 transition-transform hover:text-red-500 rounded-full"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setShowWishlist(false)} className="rounded-full">
+            Continuar Navegando
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
 
   // Dialog para Perguntas sobre Produtos
   const QuestionDialog = () => (
@@ -912,20 +1257,20 @@ export default function PrecosbaixosApp() {
           ) : (
             <>
               {/* Banner de promoção no carrinho */}
-              {cartItemsCount >= 3 && (
+              {cartItemsCount >= 2 && (
                 <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 rounded-xl">
                   <div className="flex items-center space-x-2">
                     <Gift className="w-5 h-5" />
-                    <span className="font-semibold">Parabéns! Você ganhou 30% de desconto!</span>
+                    <span className="font-semibold">Parabéns! Você ganhou 10% de desconto!</span>
                   </div>
                 </div>
               )}
               
-              {cartItemsCount === 2 && (
+              {cartItemsCount === 1 && (
                 <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 rounded-xl">
                   <div className="flex items-center space-x-2">
                     <Zap className="w-5 h-5" />
-                    <span className="font-semibold">Adicione mais 1 item e ganhe 30% de desconto!</span>
+                    <span className="font-semibold">Adicione mais 1 item e ganhe 10% de desconto!</span>
                   </div>
                 </div>
               )}
@@ -933,13 +1278,13 @@ export default function PrecosbaixosApp() {
               {cart.map((item) => (
                 <div key={item.id} className="flex items-center space-x-4 p-4 border rounded-xl hover:shadow-md transition-shadow duration-300">
                   <img
-                    src={item.image}
+                    src={item.images[0]}
                     alt={item.name}
                     className="w-16 h-16 object-cover rounded-lg"
                   />
                   <div className="flex-1">
                     <h4 className="font-medium text-sm">{item.name}</h4>
-                    <p className="text-blue-600 font-semibold">€{item.price.toFixed(2)}</p>
+                    <p className="text-blue-600 font-semibold">€{formatPrice(item.price)}</p>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Button
@@ -976,16 +1321,16 @@ export default function PrecosbaixosApp() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span>Subtotal:</span>
-                  <span>€{cartSubtotal.toFixed(2)}</span>
+                  <span>€{formatPrice(cartSubtotal)}</span>
                 </div>
                 
                 {hasPromotion && (
                   <div className="flex justify-between items-center text-blue-600">
                     <span className="flex items-center space-x-1">
                       <Gift className="w-4 h-4" />
-                      <span>Desconto (30%):</span>
+                      <span>Desconto (10%):</span>
                     </span>
-                    <span>-€{promotionDiscount.toFixed(2)}</span>
+                    <span>-€{formatPrice(promotionDiscount)}</span>
                   </div>
                 )}
                 
@@ -993,12 +1338,12 @@ export default function PrecosbaixosApp() {
                 
                 <div className="flex justify-between items-center text-lg font-semibold">
                   <span>Total:</span>
-                  <span className="text-blue-600">€{cartTotal.toFixed(2)}</span>
+                  <span className="text-blue-600">€{formatPrice(cartTotal)}</span>
                 </div>
                 
                 {hasPromotion && (
                   <p className="text-sm text-blue-600 text-center">
-                    Você economizou €{promotionDiscount.toFixed(2)}! 🎉
+                    Você economizou €{formatPrice(promotionDiscount)}! 🎉
                   </p>
                 )}
               </div>
@@ -1050,7 +1395,7 @@ export default function PrecosbaixosApp() {
             {cart.map((item) => (
               <div key={item.id} className="flex justify-between items-center mb-2">
                 <span className="text-sm">{item.name} x{item.quantity}</span>
-                <span className="text-sm font-medium">€{(item.price * item.quantity).toFixed(2)}</span>
+                <span className="text-sm font-medium">€{formatPrice(ensureNumber(item.price) * item.quantity)}</span>
               </div>
             ))}
             <Separator className="my-3" />
@@ -1058,16 +1403,16 @@ export default function PrecosbaixosApp() {
             <div className="space-y-1">
               <div className="flex justify-between items-center">
                 <span>Subtotal:</span>
-                <span>€{cartSubtotal.toFixed(2)}</span>
+                <span>€{formatPrice(cartSubtotal)}</span>
               </div>
               
               {hasPromotion && (
                 <div className="flex justify-between items-center text-blue-600">
                   <span className="flex items-center space-x-1">
                     <Gift className="w-4 h-4" />
-                    <span>Desconto (30%):</span>
+                    <span>Desconto (10%):</span>
                   </span>
-                  <span>-€{promotionDiscount.toFixed(2)}</span>
+                  <span>-€{formatPrice(promotionDiscount)}</span>
                 </div>
               )}
               
@@ -1075,7 +1420,7 @@ export default function PrecosbaixosApp() {
               
               <div className="flex justify-between items-center font-semibold text-lg">
                 <span>Total:</span>
-                <span className="text-blue-600">€{cartTotal.toFixed(2)}</span>
+                <span className="text-blue-600">€{formatPrice(cartTotal)}</span>
               </div>
             </div>
           </div>
@@ -1378,7 +1723,7 @@ export default function PrecosbaixosApp() {
                 <DollarSign className="h-4 w-4 text-blue-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-blue-600">€{totalRevenue.toFixed(2)}</div>
+                <div className="text-2xl font-bold text-blue-600">€{formatPrice(totalRevenue)}</div>
                 <p className="text-xs text-blue-600">Vendas realizadas</p>
               </CardContent>
             </Card>
@@ -1466,14 +1811,14 @@ export default function PrecosbaixosApp() {
               <Card key={product.id} className="hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-br from-white to-blue-50 rounded-2xl">
                 <CardContent className="p-4">
                   <img
-                    src={product.image}
+                    src={product.images[0]}
                     alt={product.name}
                     className="w-full h-32 object-cover rounded-xl mb-4 hover:scale-110 transition-transform duration-300"
                   />
                   <h4 className="font-semibold mb-2 text-blue-800">{product.name}</h4>
                   <p className="text-sm text-gray-600 mb-2">{product.category}</p>
                   <div className="flex items-center justify-between mb-4">
-                    <p className="text-lg font-bold text-blue-600">€{product.price.toFixed(2)}</p>
+                    <p className="text-lg font-bold text-blue-600">€{formatPrice(product.price)}</p>
                     <Badge variant={product.inStock ? "secondary" : "destructive"} className="text-xs rounded-full">
                       {product.inStock ? 'Em stock' : 'Fora de stock'}
                     </Badge>
@@ -1524,7 +1869,7 @@ export default function PrecosbaixosApp() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {categories.map((category, index) => (
+            {categories.map((category) => (
               <Card key={category} className="hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-br from-white to-blue-50 rounded-2xl">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
@@ -1592,7 +1937,7 @@ export default function PrecosbaixosApp() {
                         <p className="text-sm text-gray-500">{order.date}</p>
                       </div>
                       <div className="flex items-center space-x-4 mt-4 md:mt-0">
-                        <span className="text-xl font-bold text-blue-600">€{order.total.toFixed(2)}</span>
+                        <span className="text-xl font-bold text-blue-600">€{formatPrice(order.total)}</span>
                         <Select 
                           defaultValue={order.status}
                           onValueChange={(value) => handleUpdateOrderStatus(order.id, value)}
@@ -1617,7 +1962,7 @@ export default function PrecosbaixosApp() {
                         {order.items.map((item) => (
                           <div key={item.id} className="flex justify-between items-center text-sm bg-blue-50 p-2 rounded-lg">
                             <span>{item.name} x{item.quantity}</span>
-                            <span className="font-medium text-blue-600">€{(item.price * item.quantity).toFixed(2)}</span>
+                            <span className="font-medium text-blue-600">€{formatPrice(ensureNumber(item.price) * item.quantity)}</span>
                           </div>
                         ))}
                       </div>
@@ -1745,11 +2090,11 @@ export default function PrecosbaixosApp() {
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Array.from(new Set(orders.map(o => o.customerEmail))).map((email, index) => {
+              {Array.from(new Set(orders.map(o => o.customerEmail))).map((email) => {
                 const customerOrders = orders.filter(o => o.customerEmail === email)
                 const customerName = customerOrders[0]?.customerName
                 const customerPhone = customerOrders[0]?.customerPhone
-                const totalSpent = customerOrders.reduce((sum, order) => sum + order.total, 0)
+                const totalSpent = customerOrders.reduce((sum, order) => sum + ensureNumber(order.total), 0)
                 
                 return (
                   <Card key={email} className="hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-br from-white to-blue-50 rounded-2xl">
@@ -1780,7 +2125,7 @@ export default function PrecosbaixosApp() {
                         </div>
                         <div className="flex justify-between p-2 bg-indigo-50 rounded-lg">
                           <span>Total gasto:</span>
-                          <span className="font-medium text-indigo-600">€{totalSpent.toFixed(2)}</span>
+                          <span className="font-medium text-indigo-600">€{formatPrice(totalSpent)}</span>
                         </div>
                       </div>
                     </CardContent>
@@ -1902,14 +2247,45 @@ export default function PrecosbaixosApp() {
               />
             </div>
             <div>
-              <Label htmlFor="product-image" className="text-blue-700">URL da Imagem</Label>
-              <Input 
-                id="product-image" 
-                placeholder="https://..." 
-                value={newProduct.image}
-                onChange={(e) => setNewProduct(prev => ({ ...prev, image: e.target.value }))}
-                className="focus:ring-2 focus:ring-blue-500 rounded-xl"
-              />
+              <Label className="text-blue-700">URLs das Imagens</Label>
+              {newProduct.images.map((image, index) => (
+                <div key={index} className="flex space-x-2 mb-2">
+                  <Input 
+                    placeholder={`URL da imagem ${index + 1}`}
+                    value={image}
+                    onChange={(e) => {
+                      const newImages = [...newProduct.images]
+                      newImages[index] = e.target.value
+                      setNewProduct(prev => ({ ...prev, images: newImages }))
+                    }}
+                    className="focus:ring-2 focus:ring-blue-500 rounded-xl"
+                  />
+                  {index > 0 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const newImages = newProduct.images.filter((_, i) => i !== index)
+                        setNewProduct(prev => ({ ...prev, images: newImages }))
+                      }}
+                      className="rounded-full"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setNewProduct(prev => ({ ...prev, images: [...prev.images, ''] }))}
+                className="rounded-full"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Adicionar Imagem
+              </Button>
             </div>
             <div className="flex items-center space-x-2">
               <input
@@ -1984,7 +2360,7 @@ export default function PrecosbaixosApp() {
                     type="number" 
                     placeholder="0.00" 
                     value={editingProduct.price}
-                    onChange={(e) => setEditingProduct(prev => prev ? ({ ...prev, price: parseFloat(e.target.value) || 0 }) : null)}
+                    onChange={(e) => setEditingProduct(prev => prev ? ({ ...prev, price: ensureNumber(e.target.value) }) : null)}
                     className="focus:ring-2 focus:ring-blue-500 rounded-xl"
                   />
                 </div>
@@ -1995,7 +2371,7 @@ export default function PrecosbaixosApp() {
                     type="number" 
                     placeholder="0.00" 
                     value={editingProduct.originalPrice || ''}
-                    onChange={(e) => setEditingProduct(prev => prev ? ({ ...prev, originalPrice: e.target.value ? parseFloat(e.target.value) : undefined }) : null)}
+                    onChange={(e) => setEditingProduct(prev => prev ? ({ ...prev, originalPrice: e.target.value ? ensureNumber(e.target.value) : undefined }) : null)}
                     className="focus:ring-2 focus:ring-blue-500 rounded-xl"
                   />
                 </div>
@@ -2011,14 +2387,45 @@ export default function PrecosbaixosApp() {
                 />
               </div>
               <div>
-                <Label htmlFor="edit-product-image" className="text-blue-700">URL da Imagem</Label>
-                <Input 
-                  id="edit-product-image" 
-                  placeholder="https://..." 
-                  value={editingProduct.image}
-                  onChange={(e) => setEditingProduct(prev => prev ? ({ ...prev, image: e.target.value }) : null)}
-                  className="focus:ring-2 focus:ring-blue-500 rounded-xl"
-                />
+                <Label className="text-blue-700">URLs das Imagens</Label>
+                {editingProduct.images.map((image, index) => (
+                  <div key={index} className="flex space-x-2 mb-2">
+                    <Input 
+                      placeholder={`URL da imagem ${index + 1}`}
+                      value={image}
+                      onChange={(e) => {
+                        const newImages = [...editingProduct.images]
+                        newImages[index] = e.target.value
+                        setEditingProduct(prev => prev ? ({ ...prev, images: newImages }) : null)
+                      }}
+                      className="focus:ring-2 focus:ring-blue-500 rounded-xl"
+                    />
+                    {index > 0 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const newImages = editingProduct.images.filter((_, i) => i !== index)
+                          setEditingProduct(prev => prev ? ({ ...prev, images: newImages }) : null)
+                        }}
+                        className="rounded-full"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditingProduct(prev => prev ? ({ ...prev, images: [...prev.images, ''] }) : null)}
+                  className="rounded-full"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Adicionar Imagem
+                </Button>
               </div>
               <div className="flex items-center space-x-2">
                 <input
@@ -2081,8 +2488,10 @@ export default function PrecosbaixosApp() {
       {currentView === 'store' ? <StoreView /> : <AdminView />}
       
       <CartDialog />
+      <WishlistDialog />
       <CheckoutDialog />
       <QuestionDialog />
+      <ProductDetailDialog />
       <NotificationAlert />
 
       {/* Footer com botão admin discreto */}
