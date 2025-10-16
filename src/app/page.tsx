@@ -642,9 +642,6 @@ export default function PrecosbaixosApp() {
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent">
                   Preços Baixos
                 </h1>
-                <Badge variant="secondary" className="text-xs animate-pulse bg-blue-100 text-blue-700">
-                  Dropshipping
-                </Badge>
               </div>
             </div>
           </div>
@@ -896,30 +893,27 @@ export default function PrecosbaixosApp() {
         </CardContent>
 
         <CardFooter className="p-6 pt-0 space-y-2">
-          <div className="flex space-x-2">
-            <Button
-              onClick={() => addToCart(product)}
-              disabled={!product.inStock}
-              className="flex-1 transition-all duration-300 hover:scale-105 hover:shadow-lg bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 rounded-full"
-              size="sm"
-            >
-              <ShoppingCart className="w-4 h-4 mr-2" />
-              Adicionar ao Carrinho
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setSelectedProduct(product)
-                setCurrentImageIndex(0)
-                setShowProductDetail(true)
-              }}
-              className="px-3 transition-all duration-300 hover:scale-105 rounded-full"
-            >
-              <Eye className="w-4 h-4" />
-            </Button>
-          </div>
+          <Button
+            onClick={() => {
+              setSelectedProduct(product)
+              setCurrentImageIndex(0)
+              setShowProductDetail(true)
+            }}
+            className="w-full transition-all duration-300 hover:scale-105 hover:shadow-lg bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 rounded-full text-lg py-3"
+          >
+            <Eye className="w-5 h-5 mr-2" />
+            Ler Descrição
+          </Button>
+          
+          <Button
+            onClick={() => addToCart(product)}
+            disabled={!product.inStock}
+            className="w-full transition-all duration-300 hover:scale-105 hover:shadow-lg bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 rounded-full"
+            size="sm"
+          >
+            <ShoppingCart className="w-4 h-4 mr-2" />
+            Adicionar ao Carrinho
+          </Button>
         </CardFooter>
       </Card>
     )
@@ -1537,7 +1531,7 @@ export default function PrecosbaixosApp() {
         <div className="absolute inset-0 bg-black/5"></div>
         <div className="relative z-10 max-w-2xl">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 animate-in slide-in-from-left duration-1000">
-            Os Melhores Preços em Dropshipping
+            Os Melhores Preços Online
           </h2>
           <p className="text-lg mb-6 opacity-95 animate-in slide-in-from-left duration-1000 delay-200">
             Acessórios para carros, itens para casa e muito mais com entrega rápida e garantia total.
@@ -2510,7 +2504,7 @@ export default function PrecosbaixosApp() {
                 </h3>
               </div>
               <p className="text-gray-600 text-sm">
-                Sua loja de dropshipping com os melhores preços e qualidade garantida.
+                Sua loja online com os melhores preços e qualidade garantida.
               </p>
             </div>
             
