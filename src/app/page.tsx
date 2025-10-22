@@ -76,98 +76,111 @@ const formatPrice = (price: any): string => {
 const sampleProducts: Product[] = [
   {
     id: '1',
-    name: 'Organizador de Porta-Malas Premium',
-    price: 89.90,
-    originalPrice: 149.90,
+    name: 'CARREGADOR PARA O CARRO',
+    price: 15,
+    originalPrice: 25,
     images: [
-      'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=400&fit=crop',
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop',
-      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=400&fit=crop'
+      'https://img.kwcdn.com/product/fancy/10470504-9926-43c1-9856-acef92c6672d.jpg?imageView2/2/w/800/q/70/format/avif',
+      'https://img.kwcdn.com/product/fancy/a1b6c876-112a-49d0-93e0-c5599bbfeb12.jpg?imageView2/2/w/800/q/70/format/webp',
+      'https://img.kwcdn.com/product/fancy/c3ab8c96-680f-4003-9b88-2a8e42366b12.jpg?imageView2/2/w/800/q/70/format/webp',
+      'https://img.kwcdn.com/product/algo_check/auto/082a895d4ec13dd909872fb6c255530b_1745185356320.jpg?imageView2/2/w/800/q/70/format/webp',
+      'https://www.bing.com/images/search?view=detailV2&insightstoken=bcid_RCrsBYPIwRQJX1mA7iOGk5J30937.....zw*ccid_KuwFg8jB&form=SBIWPA&vsimg=https%3a%2f%2fwww.bing.com%2fimages%2fblob%3fbcid%3dRCrsBYPIwRQJqxcxoNWLuD9SqbotqVTdP8E&iss=SBIUPLOADGET&sbisrc=ImgPicker&idpbck=1&selectedindex=0&id=-962539434&ccid=KuwFg8jB&exph=800&expw=705&vt=3&sim=11&cal=0&cab=1&cat=0&car=1'
     ],
     category: 'Acessórios para Carros',
-    description: 'Organizador dobrável com múltiplos compartimentos para manter seu porta-malas sempre organizado. Feito com material resistente e impermeável, possui divisórias ajustáveis e alças reforçadas para fácil transporte.',
+    description: 'Carregador de Telemóvel Retrátil (Para isqueiro do carro) 4 em 1 com Carregamento Rápido de 66W e Projetor Estrelar LED, com Cabo Retrátil para Carregar Telemóveis.Design inovador roda 180º. Acabe com os fios todos espalhados no seu carro. Aproveite a promoção. Possui Duas Portas USB para Carregar Quatro Dispositivos Simultaneamente e é Compatível com iPhone 16/15/14/13/13 Pro.',
     rating: 4.8,
-    reviews: 234,
     inStock: true,
     featured: true
   },
   {
     id: '2',
-    name: 'Suporte Magnético para Telemóvel',
-    price: 34.90,
-    originalPrice: 59.90,
+    name: 'Humidificador/Difusor de fumo',
+    price: 8.99,
+    originalPrice: 15.99,
     images: [
-      'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=400&fit=crop',
-      'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=400&fit=crop'
+      'https://img.kwcdn.com/product/fancy/de6c5061-8d65-4e30-9f3f-21a720651430.jpg?imageView2/2/w/800/q/70/format/avif',
+      'https://img.kwcdn.com/product/fancy/8a180801-d90c-499d-9db0-f521b611bcf7.jpg?imageView2/2/w/800/q/70/format/webp',
+      
+      'https://img.kwcdn.com/product/algo_check/auto/2a41c729c28d06e1d11adee873b3ad95_1745467163304.jpg?imageView2/2/w/800/q/70/format/webp'
     ],
-    category: 'Acessórios para Carros',
-    description: 'Suporte magnético universal para smartphone com rotação 360°. Compatível com todos os dispositivos, instalação fácil no painel ou para-brisas.',
-    rating: 4.6,
-    reviews: 189,
+    category: 'Itens para Casa',
+    description: 'Difusor de Máquina de Vapor de Óleo Essencial e Humidificador com Luz Noturna Colorida, Função de Máquina de Vapor Frio, Refresque e Purifique a Sua Sala com uma Atmosfera Confortável, Humidificador para Casa, Quarto, Decoração de Sala de Estar, Humidificador de Quarto | Estética Moderna | Difusor Colorido, Difusor de Óleo Essencial.',
+    rating: 4.5,
     inStock: true,
-    featured: true
+    featured: true 
   },
   {
     id: '3',
-    name: 'Kit Organizador de Gavetas',
-    price: 45.90,
-    originalPrice: 79.90,
+    name: '2 Lixos Automáticos e Inteligentes',
+    price: 30.00,
+    originalPrice: 40.99,
     images: [
-      'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop',
-      'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=400&fit=crop'
+      'https://img.kwcdn.com/product/fancy/8808dece-12a6-408e-969e-fa63ac5a53ee.jpg?imageView2/2/w/800/q/70/format/avif',
+      'https://img.kwcdn.com/product/fancy/fd80c301-f9c1-4890-be00-ab1262546ebb.jpg?imageView2/2/w/800/q/70/format/webp',
+      'https://img.kwcdn.com/product/fancy/1ab9692c-be14-4684-b055-7f2544211fa1.jpg?imageView2/2/w/800/q/70/format/webp',
+      'https://img.kwcdn.com/product/fancy/ca806481-cfa4-4dc7-bbff-c195b1c34552.jpg?imageView2/2/w/800/q/70/format/webp',
+      'https://img.kwcdn.com/product/fancy/d5c43691-1653-41cb-a740-7a1eb45e154f.jpg?imageView2/2/w/800/q/70/format/webp'
     ],
-    category: 'Itens para Casa',
-    description: 'Conjunto de organizadores ajustáveis para gavetas de cozinha e casa de banho. Material durável e fácil de limpar.',
-    rating: 4.7,
-    reviews: 156,
+      category: 'Itens para Casa',
+    description: '2 Peças Lixo para Casa de Banho ou Quarto Sem Toque com Tampa, Branca - Sensor Inteligente, 11.02L Automática e Estreita para Quarto, Escritório ou Salão. Plástico Eletrônico Abertura por Movimento, Lixeira Automática,Lixeira Automática,Lixeira de Banheiro, Facil de Limpar,Plástico Durável,Uso Doméstico,Espaços Pequenos.',
+    rating: 4.8,
     inStock: true,
     featured: false
   },
   {
     id: '4',
-    name: 'Carregador Veicular Turbo',
-    price: 29.90,
-    originalPrice: 49.90,
+    name: 'Lata de lixo com sensor automático e inteligente',
+    price: 20.00,
+    originalPrice: 30.00,
     images: [
-      'https://images.unsplash.com/photo-1609592806596-4d3b0c3b4b5e?w=400&h=400&fit=crop'
+      'https://img.kwcdn.com/product/fancy/8808dece-12a6-408e-969e-fa63ac5a53ee.jpg?imageView2/2/w/800/q/70/format/avif',
+      'https://img.kwcdn.com/product/fancy/3ae5826e-6940-4b06-ad3f-86259c16bdfb.jpg?imageView2/2/w/800/q/70/format/webp',
+      'https://img.kwcdn.com/product/fancy/ca806481-cfa4-4dc7-bbff-c195b1c34552.jpg?imageView2/2/w/800/q/70/format/webp',
+      'https://img.kwcdn.com/product/fancy/569747a9-de77-4f6c-bf61-b66a776e5f75.jpg?imageView2/2/w/800/q/70/format/webp'
+      
     ],
-    category: 'Acessórios para Carros',
-    description: 'Carregador veicular com 2 portas USB e carregamento rápido. Proteção contra sobrecarga e design compacto.',
-    rating: 4.5,
-    reviews: 298,
+    category: 'Itens para Casa',
+    description: 'Lata de lixo com sensor automático de 1 unidade com operação sem mãos - Lata de lixo sem toque, design fino que poupa espaço, alimentada por bateria (baterias não incluídas) - para casa, escritório, cozinha, casa de banho, restaurante - Cesto de lixo branco moderno, lata de lixo de escritório, design minimalista, construção durável, alternativa sem toque, trabalhadores de escritório, lata de lixo automática, lata de lixo inteligente para casa de banho, lata de lixo para casa de banho pequena',
+    rating: 4.8,
     inStock: true,
-    featured: false
+    featured: false 
   },
   {
     id: '5',
-    name: 'Luminária LED com Sensor',
-    price: 67.90,
-    originalPrice: 99.90,
+    name: 'Conjunto 3 tabuleiros de corte em aço inoxidável',
+    price: 25.00,
+    originalPrice: 35.00,
     images: [
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop',
-      'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop'
+      'https://img.kwcdn.com/product/fancy/1125315f-0aa0-4eba-85b9-81c56b0f504b.jpg?imageView2/2/w/800/q/70/format/avif',
+      'https://img.kwcdn.com/product/fancy/d69814b8-5ce4-4997-8533-0399afca0c98.jpg?imageView2/2/w/800/q/70/format/webp',
+      'https://img.kwcdn.com/product/fancy/8c03e602-f449-4838-a671-c44d6ae4d48f.jpg?imageView2/2/w/800/q/70/format/webp',
+      'https://img.kwcdn.com/product/fancy/b1f9b28e-db4c-4cb9-bf6b-0fe3340caaf9.jpg?imageView2/2/w/800/q/70/format/webp',
+      'https://img.kwcdn.com/product/fancy/51a8298d-0f8b-4ccf-be84-24f0c312ef4e.jpg?imageView2/2/w/800/q/70/format/webp'
     ],
     category: 'Itens para Casa',
-    description: 'Luminária LED com sensor de movimento e bateria recarregável. Ideal para corredores, escadas e armários.',
-    rating: 4.9,
-    reviews: 87,
+    description: 'Conjunto de 3 tabuleiros de corte em aço inoxidável espessado - Tabuleiro de corte de cozinha de dupla face - Adequado para carne/frutas/legumes - Superfície de faca amigável para máquina de lavar louça - Adequado para casa, restaurante ou hotel.',
+    rating: 4.1,
     inStock: true,
     featured: true
   },
   {
     id: '6',
-    name: 'Tapete Antiderrapante Premium',
-    price: 39.90,
-    originalPrice: 69.90,
+    name: 'Conjunto de 4 Luzes Solares',
+    price: 10.99,
+    originalPrice: 19.99,
     images: [
-      'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop'
+      'https://img.kwcdn.com/product/fancy/828c31c8-84ff-4a5a-a89b-70dadd10b1bd.jpg?imageView2/2/w/800/q/70/format/webp',
+      'https://img.kwcdn.com/product/fancy/f64e690a-8339-469e-a599-c500b846a78e.jpg?imageView2/2/w/800/q/70/format/webp',
+      'https://img.kwcdn.com/product/fancy/2c1d8383-e5d2-4fae-bbb3-1701e9003392.jpg?imageView2/2/w/800/q/70/format/webp',
+      'https://img.kwcdn.com/product/fancy/ee857df2-5c95-44c7-bed0-956a51039be5.jpg?imageView2/2/w/800/q/70/format/webp',
+      'https://img.kwcdn.com/product/fancy/e5bcd55d-c075-4a41-8ac4-8dd994a5e551.jpg?imageView2/2/w/800/q/70/format/webp',
+      'https://img.kwcdn.com/product/fancy/2bd1eed9-f6bd-4e4a-9040-aa8b9c15ab70.jpg?imageView2/2/w/800/q/70/format/webp'
     ],
-    category: 'Itens para Casa',
-    description: 'Tapete antiderrapante para casa de banho com design moderno. Material absorvente e secagem rápida.',
-    rating: 4.4,
-    reviews: 123,
-    inStock: false,
-    featured: false
+     category: 'Itens para Casa',
+    description: 'Conjunto de 4 Luzes Solares para Deck, Luzes Solares para Cerca, Luzes Externas para Pátio IP44, Luzes Solares com Energia Solar, Luz Solar para Escadas Exteriores, Iluminação Solar para Cercas e Degraus',
+    rating: 4.5,
+    inStock: true,
+    featured: true
   }
 ]
 
